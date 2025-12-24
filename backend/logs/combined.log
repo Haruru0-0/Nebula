@@ -2,3 +2,13 @@
 {"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-24 17:21:12"}
 {"level":"info","message":"🔗 Health check: http://localhost:5000/health","service":"ai-agent-backend","timestamp":"2025-12-24 17:21:12"}
 {"level":"info","message":"✅ Connected to Neon Database","service":"ai-agent-backend","timestamp":"2025-12-24 17:21:12"}
+{"level":"info","message":"🚀 Server running on port 5000","service":"ai-agent-backend","timestamp":"2025-12-24 17:23:26"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-24 17:23:26"}
+{"level":"info","message":"🔗 Health check: http://localhost:5000/health","service":"ai-agent-backend","timestamp":"2025-12-24 17:23:26"}
+{"level":"info","message":"✅ Connected to Neon Database","service":"ai-agent-backend","timestamp":"2025-12-24 17:23:27"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-24 20:03:45"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-24 20:03:45"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-24 20:03:45"}
+{"level":"info","message":"✅ Connected to Neon Database","service":"ai-agent-backend","timestamp":"2025-12-24 20:03:45"}
+{"level":"info","message":"New user registered: ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-24 21:24:46"}
+{"level":"info","message":"Agent created: 58ed8c04-57b1-40f0-9e91-a0cd1ed8da76 by user ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-24 21:30:51"}

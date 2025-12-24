@@ -1,55 +1,112 @@
 "use client"
 
-import { Suspense, useState } from "react"
-import { useAgents } from "@/hooks/use-agents"
+import { Suspense, useState, useEffect, useCallback } from "react"
+import { useAppDispatch, useAppSelector } from "@/lib/store/store"
+import { fetchAgents, agentFetchSelector } from "@/lib/store/slices/agents/agentFetchSlice"
+import { deleteAgent, agentDeleteSelector, clearAgentDeleteState } from "@/lib/store/slices/agents/agentDeleteSlice"
+import { createAgent as createAgentAction, agentAddSelector, clearAgentAddState } from "@/lib/store/slices/agents/agentAddSlice"
+import { updateAgent as updateAgentAction, agentUpdateSelector, clearAgentUpdateState } from "@/lib/store/slices/agents/agentUpdateSlice"
+import { fetchAgentById, agentDetailSelector, setCurrentAgent } from "@/lib/store/slices/agents/agentDetailSlice"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { GlassCard } from "@/components/glass-card"
 import { Badge } from "@/components/ui/badge"
-import { Search, Plus, Edit2, Copy, Trash2, Star } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { Search, Plus, Edit2, Copy, Trash2, Star, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AgentEditDialog } from "@/components/agent-edit-dialog"
 import { AgentDeleteDialog } from "@/components/agent-delete-dialog"
 import type { Agent } from "@/types"
 
 function AgentsContent() {
-  const { agents, selectedAgent, setSelectedAgentId, createAgent, updateAgent, deleteAgent, duplicateAgent } =
-    useAgents()
+  const dispatch = useAppDispatch()
+
+  // Selectors
+  const { agents, isFetching: isFetchingAgents } = useAppSelector(agentFetchSelector)
+  const { currentAgent: selectedAgent, isFetching: isFetchingDetail } = useAppSelector(agentDetailSelector)
+  const { isDeleting, isSuccess: isDeleteSuccess, isError: isDeleteError, errorMessage: deleteError } = useAppSelector(agentDeleteSelector)
+  const { isAdding, isSuccess: isAddSuccess, isError: isAddError, errorMessage: addError } = useAppSelector(agentAddSelector)
+  const { isUpdating, isSuccess: isUpdateSuccess, isError: isUpdateError, errorMessage: updateError } = useAppSelector(agentUpdateSelector)
+
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedAgentId, setLocalSelectedAgentId] = useState<string | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [agentToEdit, setAgentToEdit] = useState<Agent | null>(null)
   const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null)
-  const { toast } = useToast()
+
+  const isLoading = isFetchingAgents || isDeleting || isAdding || isUpdating || isFetchingDetail
+
+  // Initial Fetch
+  useEffect(() => {
+    dispatch(fetchAgents())
+  }, [dispatch])
+
+  // Operation Handlers (Toasts & Refresh)
+  useEffect(() => {
+    if (isDeleteSuccess) {
+      toast.success("Agent deleted successfully")
+      dispatch(clearAgentDeleteState())
+      dispatch(fetchAgents())
+    }
+    if (isDeleteError) {
+      toast.error(deleteError || "Failed to delete agent")
+      dispatch(clearAgentDeleteState())
+    }
+  }, [isDeleteSuccess, isDeleteError, deleteError, dispatch])
+
+  useEffect(() => {
+    if (isAddSuccess) {
+      toast.success("Agent created successfully")
+      dispatch(clearAgentAddState())
+      dispatch(fetchAgents())
+    }
+    if (isAddError) {
+      toast.error(addError || "Failed to create agent")
+      dispatch(clearAgentAddState())
+    }
+  }, [isAddSuccess, isAddError, addError, dispatch])
+
+  useEffect(() => {
+    if (isUpdateSuccess) {
+      toast.success("Agent updated successfully")
+      dispatch(clearAgentUpdateState())
+      dispatch(fetchAgents())
+    }
+    if (isUpdateError) {
+      toast.error(updateError || "Failed to update agent")
+      dispatch(clearAgentUpdateState())
+    }
+  }, [isUpdateSuccess, isUpdateError, updateError, dispatch])
 
   const filteredAgents = agents.filter((agent) => agent.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
+  const handleSelectAgent = (id: string | null) => {
+    setLocalSelectedAgentId(id)
+    if (id) {
+      dispatch(fetchAgentById(id))
+    } else {
+      dispatch(setCurrentAgent(null))
+    }
+  }
+
   const handleEdit = (agent: Agent) => {
     setAgentToEdit(agent)
-    setSelectedAgentId(agent.id)
+    handleSelectAgent(agent.id)
     setEditDialogOpen(true)
   }
 
   const handleNewAgent = () => {
     setAgentToEdit(null)
-    setSelectedAgentId(null)
+    handleSelectAgent(null)
     setEditDialogOpen(true)
   }
 
   const handleSave = (formData: Partial<Agent>) => {
     if (agentToEdit) {
-      updateAgent(agentToEdit.id, formData)
-      toast({
-        title: "Agent Updated",
-        description: `${formData.name} has been updated successfully.`,
-      })
+      dispatch(updateAgentAction({ id: agentToEdit.id, data: formData }))
     } else {
-      createAgent(formData as Omit<Agent, "id" | "lastUpdated">)
-      toast({
-        title: "Agent Created",
-        description: `${formData.name} has been created successfully.`,
-      })
+      dispatch(createAgentAction(formData))
     }
   }
 
@@ -60,13 +117,17 @@ function AgentsContent() {
 
   const handleDeleteConfirm = () => {
     if (agentToDelete) {
-      deleteAgent(agentToDelete.id)
-      toast({
-        title: "Agent Deleted",
-        description: `${agentToDelete.name} has been deleted.`,
-      })
+      dispatch(deleteAgent(agentToDelete.id))
       setAgentToDelete(null)
     }
+  }
+
+  const handleDuplicate = (agent: Agent) => {
+    const { id: _, userId, createdAt, updatedAt, _count, ...agentData } = agent
+    dispatch(createAgentAction({
+      ...agentData,
+      name: `${agent.name} (Copy)`,
+    }))
   }
 
   return (
@@ -93,10 +154,9 @@ function AgentsContent() {
             {filteredAgents.map((agent) => (
               <GlassCard
                 key={agent.id}
-                className={`p-4 cursor-pointer transition-all ${
-                  selectedAgent?.id === agent.id ? "ring-2 ring-teal-500" : ""
-                }`}
-                onClick={() => setSelectedAgentId(agent.id)}
+                className={`p-4 cursor-pointer transition-all ${selectedAgent?.id === agent.id ? "ring-2 ring-teal-500" : ""
+                  }`}
+                onClick={() => handleSelectAgent(agent.id)}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
@@ -110,7 +170,7 @@ function AgentsContent() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
-                  Updated {new Date(agent.lastUpdated).toLocaleDateString()}
+                  Updated {new Date(agent.updatedAt).toLocaleDateString()}
                 </p>
                 <div className="flex gap-1">
                   <Button
@@ -130,8 +190,7 @@ function AgentsContent() {
                     className="h-8 w-8"
                     onClick={(e) => {
                       e.stopPropagation()
-                      duplicateAgent(agent.id)
-                      toast({ title: "Agent Duplicated" })
+                      handleDuplicate(agent)
                     }}
                   >
                     <Copy className="h-4 w-4" />
@@ -152,15 +211,28 @@ function AgentsContent() {
             ))}
           </div>
         </ScrollArea>
+
+        {isLoading && (
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center z-50 rounded-2xl">
+            <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
+          </div>
+        )}
       </div>
 
-      <AgentEditDialog open={editDialogOpen} onOpenChange={setEditDialogOpen} agent={agentToEdit} onSave={handleSave} />
+      <AgentEditDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        agent={agentToEdit}
+        onSave={handleSave}
+        isLoading={isLoading}
+      />
 
       <AgentDeleteDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         agent={agentToDelete}
         onConfirm={handleDeleteConfirm}
+        isLoading={isLoading}
       />
     </>
   )

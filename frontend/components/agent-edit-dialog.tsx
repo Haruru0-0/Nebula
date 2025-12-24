@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Loader2 } from "lucide-react"
 import type { Agent } from "@/types"
 
 interface AgentEditDialogProps {
@@ -21,13 +22,15 @@ interface AgentEditDialogProps {
   onOpenChange: (open: boolean) => void
   agent: Agent | null
   onSave: (data: Partial<Agent>) => void
+  isLoading?: boolean
 }
 
 function AgentEditForm({
   agent,
   onSave,
   onClose,
-}: { agent: Agent | null; onSave: (data: Partial<Agent>) => void; onClose: () => void }) {
+  isLoading,
+}: { agent: Agent | null; onSave: (data: Partial<Agent>) => void; onClose: () => void; isLoading?: boolean }) {
   const [formData, setFormData] = useState<Partial<Agent>>(
     agent || {
       name: "",
@@ -140,10 +143,17 @@ function AgentEditForm({
       </div>
 
       <div className="flex gap-2 pt-4">
-        <Button type="submit" className="flex-1 bg-teal-500 hover:bg-teal-400">
-          {agent ? "Save Changes" : "Create Agent"}
+        <Button type="submit" className="flex-1 bg-teal-500 hover:bg-teal-400" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {agent ? "Saving..." : "Creating..."}
+            </>
+          ) : (
+            agent ? "Save Changes" : "Create Agent"
+          )}
         </Button>
-        <Button type="button" variant="outline" onClick={onClose}>
+        <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
           Cancel
         </Button>
       </div>
@@ -151,7 +161,7 @@ function AgentEditForm({
   )
 }
 
-export function AgentEditDialog({ open, onOpenChange, agent, onSave }: AgentEditDialogProps) {
+export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }: AgentEditDialogProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
   if (isDesktop) {
@@ -163,7 +173,7 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave }: AgentEdit
             <DialogDescription>Configure your AI agent settings and behavior</DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
-            <AgentEditForm agent={agent} onSave={onSave} onClose={() => onOpenChange(false)} />
+            <AgentEditForm agent={agent} onSave={onSave} onClose={() => onOpenChange(false)} isLoading={isLoading} />
           </ScrollArea>
         </DialogContent>
       </Dialog>
@@ -178,7 +188,7 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave }: AgentEdit
           <DrawerDescription>Configure your AI agent settings and behavior</DrawerDescription>
         </DrawerHeader>
         <ScrollArea className="max-h-[80vh] px-4 pb-4">
-          <AgentEditForm agent={agent} onSave={onSave} onClose={() => onOpenChange(false)} />
+          <AgentEditForm agent={agent} onSave={onSave} onClose={() => onOpenChange(false)} isLoading={isLoading} />
         </ScrollArea>
       </DrawerContent>
     </Drawer>

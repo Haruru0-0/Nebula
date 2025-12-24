@@ -1,23 +1,41 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect, Suspense } from "react"
-import { useAgents } from "@/hooks/use-agents"
-import { useChat } from "@/hooks/use-chat"
+import { useState, useRef, useEffect, Suspense, useCallback } from "react"
+import { useAppDispatch, useAppSelector } from "@/lib/store/store"
+import { fetchAgents, agentFetchSelector } from "@/lib/store/slices/agents/agentFetchSlice"
+import { fetchAgentById, agentDetailSelector, setCurrentAgent } from "@/lib/store/slices/agents/agentDetailSlice"
+import { createAgent as createAgentAction, agentAddSelector, clearAgentAddState } from "@/lib/store/slices/agents/agentAddSlice"
+import { updateAgent as updateAgentAction, agentUpdateSelector, clearAgentUpdateState } from "@/lib/store/slices/agents/agentUpdateSlice"
+import { fetchConversations, conversationFetchSelector } from "@/lib/store/slices/chat/conversationFetchSlice"
+import { fetchConversationById, conversationDetailSelector, setActiveConversation } from "@/lib/store/slices/chat/conversationDetailSlice"
+import { sendMessage as sendMessageAction, messageSendSelector, clearMessageSendState } from "@/lib/store/slices/chat/messageSendSlice"
+import { deleteConversation, conversationDeleteSelector, clearConversationDeleteState } from "@/lib/store/slices/chat/conversationDeleteSlice"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Send, ImageIcon, Sparkles, Plus, Trash2, MessageSquare, Paperclip, Wand2 } from "lucide-react"
+import { Send, ImageIcon, Sparkles, Plus, Trash2, MessageSquare, Paperclip, Wand2, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { AgentEditDialog } from "@/components/agent-edit-dialog"
+import { toast } from "sonner"
 import type { Agent } from "@/types"
 
 function ChatPageContent() {
-  const { agents, selectedAgentId, setSelectedAgentId, selectedAgent, updateAgent, createAgent } = useAgents()
-  const { messages, isTyping, sendMessage, clearChat, getConversations, switchConversation, activeConversationId } =
-    useChat(selectedAgentId)
+  const dispatch = useAppDispatch()
+
+  // Selectors
+  const { agents } = useAppSelector(agentFetchSelector)
+  const { currentAgent: selectedAgent } = useAppSelector(agentDetailSelector)
+  const { conversations } = useAppSelector(conversationFetchSelector)
+  const { activeConversation } = useAppSelector(conversationDetailSelector)
+  const { isSending, isSuccess: isSendSuccess, isError: isSendError, errorMessage: sendError } = useAppSelector(messageSendSelector)
+  const { isSuccess: isDeleteSuccess } = useAppSelector(conversationDeleteSelector)
+  const { isSuccess: isAgentAddSuccess } = useAppSelector(agentAddSelector)
+  const { isSuccess: isAgentUpdateSuccess } = useAppSelector(agentUpdateSelector)
+
+  const [selectedAgentId, setLocalSelectedAgentId] = useState<string | null>(null)
   const [input, setInput] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -25,23 +43,71 @@ function ChatPageContent() {
   const [showAgentDialog, setShowAgentDialog] = useState(false)
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null)
 
-  const conversations = getConversations(selectedAgentId || "")
+  const messages = activeConversation?.messages || []
+  const currentConversations = conversations.filter(c => c.agentId === selectedAgentId)
 
+  // Initial Fetch
+  useEffect(() => {
+    dispatch(fetchAgents())
+  }, [dispatch])
+
+  // Scroll to bottom on messages change
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [messages, isTyping])
+  }, [messages, isSending])
 
+  // Auto-select first conversation when agent changes
   useEffect(() => {
     if (selectedAgentId) {
-      const agentConvs = getConversations(selectedAgentId)
-      if (agentConvs.length > 0) {
-        switchConversation(agentConvs[agentConvs.length - 1].id)
-      }
+      dispatch(fetchConversations(selectedAgentId))
     }
-  }, [selectedAgentId])
+  }, [selectedAgentId, dispatch])
 
+  useEffect(() => {
+    if (currentConversations.length > 0 && !activeConversation) {
+      dispatch(fetchConversationById(currentConversations[currentConversations.length - 1].id))
+    }
+  }, [currentConversations, activeConversation, dispatch])
+
+  // Operation Handlers
+  useEffect(() => {
+    if (isSendSuccess) {
+      if (selectedAgentId) dispatch(fetchConversations(selectedAgentId))
+      if (activeConversation) dispatch(fetchConversationById(activeConversation.id))
+      dispatch(clearMessageSendState())
+    }
+    if (isSendError) {
+      toast.error(sendError || "Failed to send message")
+      dispatch(clearMessageSendState())
+    }
+  }, [isSendSuccess, isSendError, sendError, dispatch, selectedAgentId, activeConversation])
+
+  useEffect(() => {
+    if (isDeleteSuccess) {
+      toast.success("Conversation deleted")
+      if (selectedAgentId) dispatch(fetchConversations(selectedAgentId))
+      dispatch(setActiveConversation(null))
+      dispatch(clearConversationDeleteState())
+    }
+  }, [isDeleteSuccess, dispatch, selectedAgentId])
+
+  useEffect(() => {
+    if (isAgentAddSuccess) {
+      dispatch(fetchAgents())
+      dispatch(clearAgentAddState())
+    }
+  }, [isAgentAddSuccess, dispatch])
+
+  useEffect(() => {
+    if (isAgentUpdateSuccess) {
+      dispatch(fetchAgents())
+      dispatch(clearAgentUpdateState())
+    }
+  }, [isAgentUpdateSuccess, dispatch])
+
+  // Textarea auto-resize
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto"
@@ -49,9 +115,24 @@ function ChatPageContent() {
     }
   }, [input])
 
+  const handleSelectAgent = (id: string | null) => {
+    setLocalSelectedAgentId(id)
+    dispatch(setActiveConversation(null))
+    if (id) {
+      dispatch(fetchAgentById(id))
+      dispatch(fetchConversations(id))
+    } else {
+      dispatch(setCurrentAgent(null))
+    }
+  }
+
   const handleSend = () => {
     if (!input.trim() || !selectedAgentId) return
-    sendMessage(input)
+    dispatch(sendMessageAction({
+      agentId: selectedAgentId,
+      message: input,
+      conversationId: activeConversation?.id
+    }))
     setInput("")
   }
 
@@ -63,24 +144,26 @@ function ChatPageContent() {
   }
 
   const handleNewConversation = () => {
-    switchConversation("")
+    dispatch(setActiveConversation(null))
   }
 
   const handleSaveAgent = (data: Partial<Agent>) => {
     if (editingAgent) {
-      updateAgent(editingAgent.id, data)
+      dispatch(updateAgentAction({ id: editingAgent.id, data }))
     } else {
-      const newAgent = createAgent(data as Omit<Agent, "id" | "createdAt">)
-      setSelectedAgentId(newAgent.id)
+      dispatch(createAgentAction(data))
     }
     setShowAgentDialog(false)
     setEditingAgent(null)
   }
 
+  const handleDeleteConversation = (id: string) => {
+    dispatch(deleteConversation(id))
+  }
+
   return (
     <div className="h-full flex gap-4 p-4 lg:p-6">
       <div className="hidden lg:flex lg:w-64 xl:w-72 flex-col gap-4">
-
         {/* Conversations List */}
         {selectedAgentId && (
           <GlassCard className="flex-1 flex flex-col overflow-hidden">
@@ -92,28 +175,28 @@ function ChatPageContent() {
             </div>
             <ScrollArea className="flex-1">
               <div className="p-2 space-y-1">
-                {conversations.length === 0 ? (
+                {currentConversations.length === 0 ? (
                   <div className="text-center py-8 px-4">
                     <MessageSquare className="h-8 w-8 text-gray-600 mx-auto mb-2" />
                     <p className="text-sm text-gray-400">No conversations yet</p>
                     <p className="text-xs text-gray-500 mt-1">Start chatting to create one</p>
                   </div>
                 ) : (
-                  conversations.map((conv) => (
+                  currentConversations.map((conv) => (
                     <button
                       key={conv.id}
-                      onClick={() => switchConversation(conv.id)}
+                      onClick={() => dispatch(fetchConversationById(conv.id))}
                       className={cn(
                         "w-full text-left p-3 rounded-lg transition-all text-sm group relative",
                         "hover:bg-white/5",
-                        activeConversationId === conv.id
+                        activeConversation?.id === conv.id
                           ? "bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-500/30"
                           : "border border-transparent",
                       )}
                     >
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <span className="truncate flex-1 font-medium">
-                          {conv.messages[0]?.content.slice(0, 30) || "New conversation"}...
+                          {conv.messages?.[0]?.content.slice(0, 30) || "New conversation"}...
                         </span>
                         <Button
                           size="icon"
@@ -121,16 +204,14 @@ function ChatPageContent() {
                           className="h-5 w-5 flex-shrink-0 opacity-0 group-hover:opacity-100"
                           onClick={(e) => {
                             e.stopPropagation()
-                            if (activeConversationId === conv.id) {
-                              clearChat()
-                            }
+                            handleDeleteConversation(conv.id)
                           }}
                         >
                           <Trash2 className="h-3 w-3 text-red-400" />
                         </Button>
                       </div>
                       <p className="text-xs text-gray-400">
-                        {conv.messages.length} messages • {new Date(conv.lastUpdated).toLocaleDateString()}
+                        {conv.messages?.length || 0} messages • {new Date(conv.updatedAt).toLocaleDateString()}
                       </p>
                     </button>
                   ))
@@ -150,7 +231,7 @@ function ChatPageContent() {
                 setEditingAgent(null)
                 setShowAgentDialog(true)
               } else {
-                setSelectedAgentId(value)
+                handleSelectAgent(value)
               }
             }}
           >
@@ -158,7 +239,7 @@ function ChatPageContent() {
               <SelectValue placeholder="Select an agent to chat..." />
             </SelectTrigger>
             <SelectContent className="bg-black/95 border-white/10">
-              {agents.map((agent) => (
+              {agents.map((agent: Agent) => (
                 <SelectItem key={agent.id} value={agent.id} className="focus:bg-white/10">
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-teal-400" />
@@ -194,15 +275,6 @@ function ChatPageContent() {
                 <span className="text-muted-foreground text-sm">No agent selected</span>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearChat}
-              disabled={messages.length === 0}
-              className="flex-shrink-0"
-            >
-              Clear
-            </Button>
           </div>
 
           {/* Messages */}
@@ -238,11 +310,11 @@ function ChatPageContent() {
                       )}
                     >
                       <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
-                      <p className="text-xs opacity-60 mt-2">{new Date(message.timestamp).toLocaleTimeString()}</p>
+                      <p className="text-xs opacity-60 mt-2">{new Date(message.createdAt).toLocaleTimeString()}</p>
                     </div>
                   </div>
                 ))}
-                {isTyping && (
+                {isSending && (
                   <div className="flex gap-3 justify-start">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400/20 to-emerald-500/20">
                       <Sparkles className="h-4 w-4 text-teal-400" />
@@ -268,7 +340,7 @@ function ChatPageContent() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={selectedAgent ? "Ask a follow-up..." : "Select an agent first..."}
-                disabled={!selectedAgent}
+                disabled={!selectedAgent || isSending}
                 className="bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[60px] max-h-[200px] px-4 pt-4 pb-2"
                 rows={1}
               />
@@ -309,7 +381,7 @@ function ChatPageContent() {
                         setEditingAgent(null)
                         setShowAgentDialog(true)
                       } else {
-                        setSelectedAgentId(value)
+                        handleSelectAgent(value)
                       }
                     }}
                   >
@@ -322,7 +394,7 @@ function ChatPageContent() {
                       </div>
                     </SelectTrigger>
                     <SelectContent className="bg-black/95 border-white/10">
-                      {agents.map((agent) => (
+                      {agents.map((agent: Agent) => (
                         <SelectItem key={agent.id} value={agent.id} className="focus:bg-white/10">
                           <div className="flex items-center gap-2">
                             <Sparkles className="h-3.5 w-3.5 text-teal-400" />
@@ -342,11 +414,11 @@ function ChatPageContent() {
 
                 <Button
                   onClick={handleSend}
-                  disabled={!input.trim() || !selectedAgent}
+                  disabled={!input.trim() || !selectedAgent || isSending}
                   size="icon"
-                  className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30"
+                  className="h-8 w-8 rounded-lg bg-teal-500 hover:bg-teal-400 disabled:opacity-30"
                 >
-                  <Send className="h-4 w-4" />
+                  {isSending ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Send className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
