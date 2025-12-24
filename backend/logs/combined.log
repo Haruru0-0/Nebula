@@ -1,0 +1,4 @@
+{"level":"info","message":"🚀 Server running on port 5000","service":"ai-agent-backend","timestamp":"2025-12-24 17:21:12"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-24 17:21:12"}
+{"level":"info","message":"🔗 Health check: http://localhost:5000/health","service":"ai-agent-backend","timestamp":"2025-12-24 17:21:12"}
+{"level":"info","message":"✅ Connected to Neon Database","service":"ai-agent-backend","timestamp":"2025-12-24 17:21:12"}
