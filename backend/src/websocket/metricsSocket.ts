@@ -3,6 +3,7 @@ import { verifyAccessToken } from "../utils/jwt";
 import logger from "../utils/logger";
 import { Server, Socket } from 'socket.io';
 import { SocketData } from '../types';
+import { Conversation } from "../generated/prisma/client";
 
 interface SocketWithData extends Socket {
   data: SocketData;
@@ -65,7 +66,7 @@ export const setupMetricsSocket = (io: Server): void => {
               select: { id: true },
             });
 
-            const conversationIds = conversations.map((c) => c.id);
+            const conversationIds = conversations.map((c: Conversation) => c.id);
 
             const recentMetrics = await prisma.metric.findMany({
               where: {

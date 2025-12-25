@@ -9,20 +9,29 @@ export const createAgent = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { name, systemPrompt, model, temperature, maxTokens } = req.body as CreateAgentBody;
+    const { name, systemPrompt, model, provider, temperature, maxTokens } = req.body as CreateAgentBody;
+
+    // Set default model based on provider
+    let defaultModel = 'gpt-4-turbo-preview';
+    const selectedProvider = provider || 'openai';
+    
+    if (selectedProvider === 'gemini' && !model) {
+      defaultModel = 'gemini-1.5-pro';
+    }
 
     const agent = await prisma.agent.create({
       data: {
         name,
         systemPrompt,
-        model: model || 'gpt-4-turbo-preview',
+        provider: selectedProvider,
+        model: model || defaultModel,
         temperature: temperature ?? 0.7,
         maxTokens: maxTokens ?? 1000,
         userId: req.user!.id,
       },
     });
 
-    logger.info(`Agent created: ${agent.id} by user ${req.user!.email}`);
+    logger.info(`Agent created: ${agent.id} by user ${req.user!.email} (Provider: ${selectedProvider})`);
 
     res.status(201).json({
       success: true,

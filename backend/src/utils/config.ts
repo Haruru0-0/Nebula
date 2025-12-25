@@ -18,6 +18,7 @@ export const config = {
     password: must("SMTP_PASSWORD"),
   },
   openAiApiKey: must("OPENAI_API_KEY"),
+  geminiApiKey: must("GEMINI_API_KEY"),
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS ?? "900000"),
     maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS ?? "100"), 

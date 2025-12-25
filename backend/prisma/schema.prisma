@@ -34,7 +34,8 @@ model Agent {
   id            String         @id @default(uuid())
   name          String
   systemPrompt  String         @db.Text
-  model         String         @default("claude-sonnet-4-20250514")
+  model         String         @default("gpt-4.1")
+  provider      String         @default("openai") 
   temperature   Float          @default(0.7)
   maxTokens     Int            @default(1000)
   isActive      Boolean        @default(true)

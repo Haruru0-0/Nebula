@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect, Suspense, useCallback } from "react"
+import { useState, useRef, useEffect, Suspense, useCallback, useMemo } from "react"
 import { useAppDispatch, useAppSelector } from "@/lib/store/store"
 import { fetchAgents, agentFetchSelector } from "@/lib/store/slices/agents/agentFetchSlice"
 import { fetchAgentById, agentDetailSelector, setCurrentAgent } from "@/lib/store/slices/agents/agentDetailSlice"
@@ -28,8 +28,8 @@ function ChatPageContent() {
   // Selectors
   const { agents } = useAppSelector(agentFetchSelector)
   const { currentAgent: selectedAgent } = useAppSelector(agentDetailSelector)
-  const { conversations } = useAppSelector(conversationFetchSelector)
-  const { activeConversation } = useAppSelector(conversationDetailSelector)
+  const { conversations, isFetching: isFetchingConvs } = useAppSelector(conversationFetchSelector)
+  const { activeConversation, isFetching: isFetchingDetail } = useAppSelector(conversationDetailSelector)
   const { isSending, isSuccess: isSendSuccess, isError: isSendError, errorMessage: sendError } = useAppSelector(messageSendSelector)
   const { isSuccess: isDeleteSuccess } = useAppSelector(conversationDeleteSelector)
   const { isSuccess: isAgentAddSuccess } = useAppSelector(agentAddSelector)
@@ -44,7 +44,10 @@ function ChatPageContent() {
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null)
 
   const messages = activeConversation?.messages || []
-  const currentConversations = conversations.filter(c => c.agentId === selectedAgentId)
+  const currentConversations = useMemo(() =>
+    conversations.filter(c => c.agentId === selectedAgentId),
+    [conversations, selectedAgentId]
+  )
 
   // Initial Fetch
   useEffect(() => {
@@ -60,16 +63,16 @@ function ChatPageContent() {
 
   // Auto-select first conversation when agent changes
   useEffect(() => {
-    if (selectedAgentId) {
+    if (selectedAgentId && !isFetchingConvs) {
       dispatch(fetchConversations(selectedAgentId))
     }
-  }, [selectedAgentId, dispatch])
+  }, [selectedAgentId, dispatch]) // Only fetch when agent ID changes
 
   useEffect(() => {
-    if (currentConversations.length > 0 && !activeConversation) {
+    if (currentConversations.length > 0 && !activeConversation && !isFetchingDetail) {
       dispatch(fetchConversationById(currentConversations[currentConversations.length - 1].id))
     }
-  }, [currentConversations, activeConversation, dispatch])
+  }, [currentConversations, activeConversation, isFetchingDetail, dispatch])
 
   // Operation Handlers
   useEffect(() => {

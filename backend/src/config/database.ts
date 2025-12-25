@@ -13,7 +13,7 @@ prisma.$connect()
   .then(() => {
     logger.info('✅ Connected to Neon Database');
   })
-  .catch((error) => {
+  .catch((error: any) => {
     logger.error('❌ Database connection failed:', error);
     process.exit(1);
   });

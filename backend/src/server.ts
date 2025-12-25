@@ -1,9 +1,9 @@
 import http from "http";
 import { Server } from "socket.io";
-import app from "./app";
 import { setupMetricsSocket } from "./websocket/metricsSocket";
 import logger from "./utils/logger";
 import "./config/database";
+import app from "./app";
 
 const PORT = process.env.PORT || 5000;
 

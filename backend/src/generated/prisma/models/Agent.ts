@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums"
-import type * as Prisma from "../internal/prismaNamespace"
+import type * as $Enums from "../enums.js"
+import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model Agent
@@ -41,6 +41,7 @@ export type AgentMinAggregateOutputType = {
   name: string | null
   systemPrompt: string | null
   model: string | null
+  provider: string | null
   temperature: number | null
   maxTokens: number | null
   isActive: boolean | null
@@ -54,6 +55,7 @@ export type AgentMaxAggregateOutputType = {
   name: string | null
   systemPrompt: string | null
   model: string | null
+  provider: string | null
   temperature: number | null
   maxTokens: number | null
   isActive: boolean | null
@@ -67,6 +69,7 @@ export type AgentCountAggregateOutputType = {
   name: number
   systemPrompt: number
   model: number
+  provider: number
   temperature: number
   maxTokens: number
   isActive: number
@@ -92,6 +95,7 @@ export type AgentMinAggregateInputType = {
   name?: true
   systemPrompt?: true
   model?: true
+  provider?: true
   temperature?: true
   maxTokens?: true
   isActive?: true
@@ -105,6 +109,7 @@ export type AgentMaxAggregateInputType = {
   name?: true
   systemPrompt?: true
   model?: true
+  provider?: true
   temperature?: true
   maxTokens?: true
   isActive?: true
@@ -118,6 +123,7 @@ export type AgentCountAggregateInputType = {
   name?: true
   systemPrompt?: true
   model?: true
+  provider?: true
   temperature?: true
   maxTokens?: true
   isActive?: true
@@ -218,6 +224,7 @@ export type AgentGroupByOutputType = {
   name: string
   systemPrompt: string
   model: string
+  provider: string
   temperature: number
   maxTokens: number
   isActive: boolean
@@ -254,6 +261,7 @@ export type AgentWhereInput = {
   name?: Prisma.StringFilter<"Agent"> | string
   systemPrompt?: Prisma.StringFilter<"Agent"> | string
   model?: Prisma.StringFilter<"Agent"> | string
+  provider?: Prisma.StringFilter<"Agent"> | string
   temperature?: Prisma.FloatFilter<"Agent"> | number
   maxTokens?: Prisma.IntFilter<"Agent"> | number
   isActive?: Prisma.BoolFilter<"Agent"> | boolean
@@ -269,6 +277,7 @@ export type AgentOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   model?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   temperature?: Prisma.SortOrder
   maxTokens?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -287,6 +296,7 @@ export type AgentWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Agent"> | string
   systemPrompt?: Prisma.StringFilter<"Agent"> | string
   model?: Prisma.StringFilter<"Agent"> | string
+  provider?: Prisma.StringFilter<"Agent"> | string
   temperature?: Prisma.FloatFilter<"Agent"> | number
   maxTokens?: Prisma.IntFilter<"Agent"> | number
   isActive?: Prisma.BoolFilter<"Agent"> | boolean
@@ -302,6 +312,7 @@ export type AgentOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   model?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   temperature?: Prisma.SortOrder
   maxTokens?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -323,6 +334,7 @@ export type AgentScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Agent"> | string
   systemPrompt?: Prisma.StringWithAggregatesFilter<"Agent"> | string
   model?: Prisma.StringWithAggregatesFilter<"Agent"> | string
+  provider?: Prisma.StringWithAggregatesFilter<"Agent"> | string
   temperature?: Prisma.FloatWithAggregatesFilter<"Agent"> | number
   maxTokens?: Prisma.IntWithAggregatesFilter<"Agent"> | number
   isActive?: Prisma.BoolWithAggregatesFilter<"Agent"> | boolean
@@ -336,6 +348,7 @@ export type AgentCreateInput = {
   name: string
   systemPrompt: string
   model?: string
+  provider?: string
   temperature?: number
   maxTokens?: number
   isActive?: boolean
@@ -350,6 +363,7 @@ export type AgentUncheckedCreateInput = {
   name: string
   systemPrompt: string
   model?: string
+  provider?: string
   temperature?: number
   maxTokens?: number
   isActive?: boolean
@@ -364,6 +378,7 @@ export type AgentUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -378,6 +393,7 @@ export type AgentUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -392,6 +408,7 @@ export type AgentCreateManyInput = {
   name: string
   systemPrompt: string
   model?: string
+  provider?: string
   temperature?: number
   maxTokens?: number
   isActive?: boolean
@@ -405,6 +422,7 @@ export type AgentUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -417,6 +435,7 @@ export type AgentUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -440,6 +459,7 @@ export type AgentCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   model?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   temperature?: Prisma.SortOrder
   maxTokens?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -458,6 +478,7 @@ export type AgentMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   model?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   temperature?: Prisma.SortOrder
   maxTokens?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -471,6 +492,7 @@ export type AgentMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   model?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   temperature?: Prisma.SortOrder
   maxTokens?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -566,6 +588,7 @@ export type AgentCreateWithoutUserInput = {
   name: string
   systemPrompt: string
   model?: string
+  provider?: string
   temperature?: number
   maxTokens?: number
   isActive?: boolean
@@ -579,6 +602,7 @@ export type AgentUncheckedCreateWithoutUserInput = {
   name: string
   systemPrompt: string
   model?: string
+  provider?: string
   temperature?: number
   maxTokens?: number
   isActive?: boolean
@@ -621,6 +645,7 @@ export type AgentScalarWhereInput = {
   name?: Prisma.StringFilter<"Agent"> | string
   systemPrompt?: Prisma.StringFilter<"Agent"> | string
   model?: Prisma.StringFilter<"Agent"> | string
+  provider?: Prisma.StringFilter<"Agent"> | string
   temperature?: Prisma.FloatFilter<"Agent"> | number
   maxTokens?: Prisma.IntFilter<"Agent"> | number
   isActive?: Prisma.BoolFilter<"Agent"> | boolean
@@ -634,6 +659,7 @@ export type AgentCreateWithoutConversationsInput = {
   name: string
   systemPrompt: string
   model?: string
+  provider?: string
   temperature?: number
   maxTokens?: number
   isActive?: boolean
@@ -647,6 +673,7 @@ export type AgentUncheckedCreateWithoutConversationsInput = {
   name: string
   systemPrompt: string
   model?: string
+  provider?: string
   temperature?: number
   maxTokens?: number
   isActive?: boolean
@@ -676,6 +703,7 @@ export type AgentUpdateWithoutConversationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -689,6 +717,7 @@ export type AgentUncheckedUpdateWithoutConversationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -702,6 +731,7 @@ export type AgentCreateManyUserInput = {
   name: string
   systemPrompt: string
   model?: string
+  provider?: string
   temperature?: number
   maxTokens?: number
   isActive?: boolean
@@ -714,6 +744,7 @@ export type AgentUpdateWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -727,6 +758,7 @@ export type AgentUncheckedUpdateWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -740,6 +772,7 @@ export type AgentUncheckedUpdateManyWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -783,6 +816,7 @@ export type AgentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   name?: boolean
   systemPrompt?: boolean
   model?: boolean
+  provider?: boolean
   temperature?: boolean
   maxTokens?: boolean
   isActive?: boolean
@@ -799,6 +833,7 @@ export type AgentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   name?: boolean
   systemPrompt?: boolean
   model?: boolean
+  provider?: boolean
   temperature?: boolean
   maxTokens?: boolean
   isActive?: boolean
@@ -813,6 +848,7 @@ export type AgentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   name?: boolean
   systemPrompt?: boolean
   model?: boolean
+  provider?: boolean
   temperature?: boolean
   maxTokens?: boolean
   isActive?: boolean
@@ -827,6 +863,7 @@ export type AgentSelectScalar = {
   name?: boolean
   systemPrompt?: boolean
   model?: boolean
+  provider?: boolean
   temperature?: boolean
   maxTokens?: boolean
   isActive?: boolean
@@ -835,7 +872,7 @@ export type AgentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AgentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "systemPrompt" | "model" | "temperature" | "maxTokens" | "isActive" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["agent"]>
+export type AgentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "systemPrompt" | "model" | "provider" | "temperature" | "maxTokens" | "isActive" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["agent"]>
 export type AgentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   conversations?: boolean | Prisma.Agent$conversationsArgs<ExtArgs>
@@ -859,6 +896,7 @@ export type $AgentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     name: string
     systemPrompt: string
     model: string
+    provider: string
     temperature: number
     maxTokens: number
     isActive: boolean
@@ -1294,6 +1332,7 @@ export interface AgentFieldRefs {
   readonly name: Prisma.FieldRef<"Agent", 'String'>
   readonly systemPrompt: Prisma.FieldRef<"Agent", 'String'>
   readonly model: Prisma.FieldRef<"Agent", 'String'>
+  readonly provider: Prisma.FieldRef<"Agent", 'String'>
   readonly temperature: Prisma.FieldRef<"Agent", 'Float'>
   readonly maxTokens: Prisma.FieldRef<"Agent", 'Int'>
   readonly isActive: Prisma.FieldRef<"Agent", 'Boolean'>

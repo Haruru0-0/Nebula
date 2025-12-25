@@ -37,6 +37,7 @@ export interface CreateAgentBody {
   name: string;
   systemPrompt: string;
   model?: string;
+  provider?: 'openai' | 'gemini';
   temperature?: number;
   maxTokens?: number;
 }
@@ -45,6 +46,7 @@ export interface UpdateAgentBody {
   name?: string;
   systemPrompt?: string;
   model?: string;
+  provider?: 'openai' | 'gemini';
   temperature?: number;
   maxTokens?: number;
   isActive?: boolean;
