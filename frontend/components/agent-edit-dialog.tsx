@@ -1,11 +1,25 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useMediaQuery } from "@/hooks/use-media-query"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+  DrawerClose,
+} from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -15,6 +29,7 @@ import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
 import type { Agent } from "@/types"
 
 interface AgentEditDialogProps {
@@ -66,15 +81,14 @@ function AgentEditForm({
     ],
   }
 
-  // Reset model when provider changes
   useEffect(() => {
     const availableModels = modelsByProvider[formData.provider as keyof typeof modelsByProvider]
     if (availableModels && availableModels.length > 0) {
       const firstModel = availableModels[0].id
       if (formData.model !== firstModel) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          model: firstModel
+          model: firstModel,
         }))
       }
     }
@@ -95,26 +109,30 @@ function AgentEditForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+    <form id="agent-form" onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="name">Agent Name</Label>
+          <Label htmlFor="name" className="text-zinc-400 mb-1.5 block">
+            Agent Name
+          </Label>
           <Input
             id="name"
             value={formData.name || ""}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="e.g., Content Writer"
-            className="bg-white/5 border-white/10"
+            className="bg-white/5 border-white/10 h-11 focus:ring-teal-500/20"
             required
           />
         </div>
         <div>
-          <Label htmlFor="provider">AI Provider</Label>
+          <Label htmlFor="provider" className="text-zinc-400 mb-1.5 block">
+            AI Provider
+          </Label>
           <Select
             value={formData.provider || "openai"}
             onValueChange={(value: "openai" | "gemini") => handleProviderChange(value)}
           >
-            <SelectTrigger id="provider" className="bg-white/5 border-white/10">
+            <SelectTrigger id="provider" className="bg-white/5 border-white/10 h-11">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-black/95 border-white/10">
@@ -126,42 +144,62 @@ function AgentEditForm({
       </div>
 
       <div>
-        <Label htmlFor="prompt">System Prompt</Label>
+        <Label htmlFor="prompt" className="text-zinc-400 mb-1.5 block">
+          System Prompt
+        </Label>
         <Textarea
           id="prompt"
           value={formData.systemPrompt || ""}
           onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value })}
           placeholder="Define how your agent should behave..."
-          rows={6}
-          className="bg-white/5 border-white/10 resize-none"
+          rows={8}
+          className="bg-white/5 border-white/10 resize-none focus:ring-teal-500/20"
           required
         />
       </div>
 
-      <div>
-        <Label htmlFor="model">Model</Label>
-        <Select
-          key={`model-${formData.provider}`}
-          value={formData.model}
-          onValueChange={(value) => setFormData({ ...formData, model: value })}
-        >
-          <SelectTrigger id="model" className="bg-white/5 border-white/10">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-black/95 border-white/10">
-            {(modelsByProvider[formData.provider as keyof typeof modelsByProvider] || modelsByProvider.openai).map(
-              (model) => (
-                <SelectItem key={model.id} value={model.id}>
-                  {model.name}
-                </SelectItem>
-              ),
-            )}
-          </SelectContent>
-        </Select>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="model" className="text-zinc-400 mb-1.5 block">
+            Model
+          </Label>
+          <Select
+            key={`model-${formData.provider}`}
+            value={formData.model}
+            onValueChange={(value) => setFormData({ ...formData, model: value })}
+          >
+            <SelectTrigger id="model" className="bg-white/5 border-white/10 h-11">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-black/95 border-white/10 border-teal-500/20">
+              {(modelsByProvider[formData.provider as keyof typeof modelsByProvider] || modelsByProvider.openai).map(
+                (model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    {model.name}
+                  </SelectItem>
+                ),
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="maxTokens" className="text-zinc-400 mb-1.5 block">
+            Max Tokens
+          </Label>
+          <Input
+            id="maxTokens"
+            type="number"
+            value={formData.maxTokens || 2000}
+            onChange={(e) => setFormData({ ...formData, maxTokens: Number.parseInt(e.target.value) })}
+            className="bg-white/5 border-white/10 h-11 focus:ring-teal-500/20"
+          />
+        </div>
       </div>
 
       <div>
-        <Label htmlFor="temperature">Temperature: {formData.temperature?.toFixed(1) || "0.7"}</Label>
+        <Label htmlFor="temperature" className="text-zinc-400 mb-1.5 block">
+          Temperature: {formData.temperature?.toFixed(1) || "0.7"}
+        </Label>
         <Slider
           id="temperature"
           value={[formData.temperature || 0.7]}
@@ -174,24 +212,18 @@ function AgentEditForm({
       </div>
 
       <div>
-        <Label htmlFor="maxTokens">Max Tokens</Label>
-        <Input
-          id="maxTokens"
-          type="number"
-          value={formData.maxTokens || 2000}
-          onChange={(e) => setFormData({ ...formData, maxTokens: Number.parseInt(e.target.value) })}
-          className="bg-white/5 border-white/10"
-        />
-      </div>
-
-      <div>
-        <Label>Tools</Label>
+        <Label className="text-zinc-400 mb-1.5 block">Capabilities</Label>
         <div className="flex flex-wrap gap-2 mt-2">
           {["Web", "Files", "Code", "Vision"].map((tool) => (
             <Badge
               key={tool}
               variant={formData.tools?.includes(tool) ? "default" : "outline"}
-              className="cursor-pointer"
+              className={cn(
+                "cursor-pointer px-4 py-2 text-sm transition-all duration-200",
+                formData.tools?.includes(tool)
+                  ? "bg-teal-500 text-black hover:bg-teal-400 shadow-lg shadow-teal-500/20"
+                  : "hover:bg-white/10 border-white/10 text-zinc-400",
+              )}
               onClick={() => {
                 const tools = formData.tools || []
                 setFormData({
@@ -205,22 +237,6 @@ function AgentEditForm({
           ))}
         </div>
       </div>
-
-      <div className="flex gap-2 pt-4">
-        <Button type="submit" className="flex-1 bg-teal-500 hover:bg-teal-400" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {agent ? "Saving..." : "Creating..."}
-            </>
-          ) : (
-            agent ? "Save Changes" : "Create Agent"
-          )}
-        </Button>
-        <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-          Cancel
-        </Button>
-      </div>
     </form>
   )
 }
@@ -231,12 +247,17 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-black/95 border-white/10 max-w-2xl max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>{agent ? "Edit Agent" : "Create New Agent"}</DialogTitle>
-            <DialogDescription>Configure your AI agent settings and behavior</DialogDescription>
+        <DialogContent className="bg-zinc-950 border-white/10 max-w-2xl h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl">
+          <DialogHeader className="p-8 pb-4 flex-shrink-0 border-b border-white/5">
+            <DialogTitle className="text-3xl font-bold tracking-tight">
+              {agent ? "Edit Agent" : "Create New Agent"}
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400 text-lg">
+              Define your agent's identity, behavior, and specialized tools.
+            </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+
+          <ScrollArea className="flex-1 p-8">
             <AgentEditForm
               key={agent?.id || "new"}
               agent={agent}
@@ -246,6 +267,33 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
             />
           </ScrollArea>
 
+          <DialogFooter className="p-8 pt-4 border-t border-white/10 flex-shrink-0 bg-black/40">
+            <Button
+              type="submit"
+              form="agent-form"
+              size="lg"
+              className="px-8 bg-teal-500 hover:bg-teal-400 text-black font-bold h-12"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : agent ? (
+                "Save Changes"
+              ) : (
+                "Create Agent"
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="lg"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+              className="px-8 text-zinc-400 hover:text-white h-12"
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     )
@@ -253,12 +301,14 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-black/95 border-white/10">
-        <DrawerHeader>
-          <DrawerTitle>{agent ? "Edit Agent" : "Create New Agent"}</DrawerTitle>
-          <DrawerDescription>Configure your AI agent settings and behavior</DrawerDescription>
+      <DrawerContent className="bg-zinc-950 border-white/10 h-[96dvh] max-h-[96dvh] flex flex-col p-0 rounded-t-[32px] overflow-hidden">
+        <div className="mx-auto w-12 h-1.5 bg-zinc-800 rounded-full mt-3 mb-1 shrink-0" />
+        <DrawerHeader className="p-6 pb-2 flex-shrink-0 text-left">
+          <DrawerTitle className="text-2xl font-bold">{agent ? "Edit Agent" : "New Agent"}</DrawerTitle>
+          <DrawerDescription className="text-zinc-400">Configure your AI assistant.</DrawerDescription>
         </DrawerHeader>
-        <ScrollArea className="max-h-[80vh] px-4 pb-4">
+
+        <div className="flex-1 overflow-y-auto px-6 py-4 min-h-0 custom-scrollbar">
           <AgentEditForm
             key={agent?.id || "new"}
             agent={agent}
@@ -266,9 +316,36 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
             onClose={() => onOpenChange(false)}
             isLoading={isLoading}
           />
-        </ScrollArea>
+        </div>
 
+        <DrawerFooter className="p-6 pt-4 pb-12 border-t border-white/10 flex-shrink-0 flex flex-row gap-3 bg-black/60 backdrop-blur-md">
+          <Button
+            type="submit"
+            form="agent-form"
+            className="flex-1 h-14 bg-teal-500 hover:bg-teal-400 text-black font-bold text-lg rounded-2xl shadow-lg shadow-teal-500/10"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : agent ? (
+              "Save"
+            ) : (
+              "Create"
+            )}
+          </Button>
+          <DrawerClose asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 h-14 border-white/10 text-zinc-300 font-semibold text-lg rounded-2xl"
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+          </DrawerClose>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   )
 }
+
