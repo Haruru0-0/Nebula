@@ -31,22 +31,62 @@ function AgentEditForm({
   onClose,
   isLoading,
 }: { agent: Agent | null; onSave: (data: Partial<Agent>) => void; onClose: () => void; isLoading?: boolean }) {
-  const [formData, setFormData] = useState<Partial<Agent>>(
-    agent || {
+  const [formData, setFormData] = useState<Partial<Agent>>(() => {
+    if (agent) {
+      return {
+        ...agent,
+        provider: agent.provider || "openai",
+      }
+    }
+    return {
       name: "",
       systemPrompt: "",
-      model: "gpt-4",
+      provider: "openai",
+      model: "gpt-5.2",
       temperature: 0.7,
       maxTokens: 2000,
       tools: [],
-    },
-  )
-
-  useEffect(() => {
-    if (agent) {
-      setFormData(agent)
     }
-  }, [agent])
+  })
+
+  const modelsByProvider = {
+    openai: [
+      { id: "gpt-5.2", name: "GPT-5.2" },
+      { id: "gpt-5-mini", name: "GPT-5 Mini" },
+      { id: "gpt-5-nano", name: "GPT-5 Nano" },
+      { id: "gpt-5.2-pro", name: "GPT-5.2 Pro" },
+      { id: "gpt-5", name: "GPT-5" },
+      { id: "gpt-4.1", name: "GPT-4.1" },
+    ],
+    gemini: [
+      { id: "gemini-3.0-pro", name: "Gemini 3.0 Pro" },
+      { id: "gemini-3.0-flash", name: "Gemini 3.0 Flash" },
+      { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro" },
+      { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" },
+    ],
+  }
+
+  // Reset model when provider changes
+  useEffect(() => {
+    const availableModels = modelsByProvider[formData.provider as keyof typeof modelsByProvider]
+    if (availableModels && availableModels.length > 0) {
+      const firstModel = availableModels[0].id
+      if (formData.model !== firstModel) {
+        setFormData(prev => ({
+          ...prev,
+          model: firstModel
+        }))
+      }
+    }
+  }, [formData.provider])
+
+  const handleProviderChange = (provider: "openai" | "gemini") => {
+    setFormData({
+      ...formData,
+      provider,
+      model: modelsByProvider[provider][0].id,
+    })
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,16 +96,33 @@ function AgentEditForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="name">Agent Name</Label>
-        <Input
-          id="name"
-          value={formData.name || ""}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="e.g., Content Writer"
-          className="bg-white/5 border-white/10"
-          required
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="name">Agent Name</Label>
+          <Input
+            id="name"
+            value={formData.name || ""}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g., Content Writer"
+            className="bg-white/5 border-white/10"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="provider">AI Provider</Label>
+          <Select
+            value={formData.provider || "openai"}
+            onValueChange={(value: "openai" | "gemini") => handleProviderChange(value)}
+          >
+            <SelectTrigger id="provider" className="bg-white/5 border-white/10">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-black/95 border-white/10">
+              <SelectItem value="openai">OpenAI</SelectItem>
+              <SelectItem value="gemini">Google Gemini</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div>
@@ -83,15 +140,22 @@ function AgentEditForm({
 
       <div>
         <Label htmlFor="model">Model</Label>
-        <Select value={formData.model || "gpt-4"} onValueChange={(value) => setFormData({ ...formData, model: value })}>
+        <Select
+          key={`model-${formData.provider}`}
+          value={formData.model}
+          onValueChange={(value) => setFormData({ ...formData, model: value })}
+        >
           <SelectTrigger id="model" className="bg-white/5 border-white/10">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-black/95 border-white/10">
-            <SelectItem value="gpt-4">GPT-4</SelectItem>
-            <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
-            <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
-            <SelectItem value="claude-3-sonnet">Claude 3 Sonnet</SelectItem>
+            {(modelsByProvider[formData.provider as keyof typeof modelsByProvider] || modelsByProvider.openai).map(
+              (model) => (
+                <SelectItem key={model.id} value={model.id}>
+                  {model.name}
+                </SelectItem>
+              ),
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -173,8 +237,15 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
             <DialogDescription>Configure your AI agent settings and behavior</DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
-            <AgentEditForm agent={agent} onSave={onSave} onClose={() => onOpenChange(false)} isLoading={isLoading} />
+            <AgentEditForm
+              key={agent?.id || "new"}
+              agent={agent}
+              onSave={onSave}
+              onClose={() => onOpenChange(false)}
+              isLoading={isLoading}
+            />
           </ScrollArea>
+
         </DialogContent>
       </Dialog>
     )
@@ -188,8 +259,15 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
           <DrawerDescription>Configure your AI agent settings and behavior</DrawerDescription>
         </DrawerHeader>
         <ScrollArea className="max-h-[80vh] px-4 pb-4">
-          <AgentEditForm agent={agent} onSave={onSave} onClose={() => onOpenChange(false)} isLoading={isLoading} />
+          <AgentEditForm
+            key={agent?.id || "new"}
+            agent={agent}
+            onSave={onSave}
+            onClose={() => onOpenChange(false)}
+            isLoading={isLoading}
+          />
         </ScrollArea>
+
       </DrawerContent>
     </Drawer>
   )

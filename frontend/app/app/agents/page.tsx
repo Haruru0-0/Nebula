@@ -104,7 +104,18 @@ function AgentsContent() {
 
   const handleSave = (formData: Partial<Agent>) => {
     if (agentToEdit) {
-      dispatch(updateAgentAction({ id: agentToEdit.id, data: formData }))
+      // Filter out fields that backend doesn't allow for updates
+      const { id, userId, createdAt, updatedAt, _count, isFavorite, ...updateData } = formData as any
+      const allowedFields = ["name", "systemPrompt", "provider", "model", "temperature", "maxTokens", "isActive"]
+
+      const filteredData = Object.keys(updateData)
+        .filter(key => allowedFields.includes(key))
+        .reduce((obj: any, key) => {
+          obj[key] = updateData[key]
+          return obj
+        }, {})
+
+      dispatch(updateAgentAction({ id: agentToEdit.id, data: filteredData }))
     } else {
       dispatch(createAgentAction(formData))
     }
@@ -164,9 +175,14 @@ function AgentsContent() {
                       <h3 className="font-semibold truncate">{agent.name}</h3>
                       {agent.isFavorite && <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />}
                     </div>
-                    <Badge variant="outline" className="text-xs mt-1">
-                      {agent.model}
-                    </Badge>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <Badge variant="secondary" className="text-[10px] px-1 h-4 uppercase font-bold bg-white/10">
+                        {agent.provider || "openai"}
+                      </Badge>
+                      <Badge variant="outline" className="text-[10px] px-1 h-4">
+                        {agent.model}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">

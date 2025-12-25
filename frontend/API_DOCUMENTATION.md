@@ -12,6 +12,20 @@ Most endpoints require authentication via a JSON Web Token (JWT).
 
 ---
 
+## 🏥 Health Check
+- **URL:** `/health`
+- **Method:** `GET`
+- **Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "AI Agent Management API is running",
+  "timestamp": "2023-10-27T10:00:00.000Z"
+}
+```
+
+---
+
 ## 🔐 Auth APIs
 Base Path: `/auth`
 
@@ -147,7 +161,8 @@ Base Path: `/agents` (Requires Auth)
 {
   "name": "Support Bot",
   "systemPrompt": "You are a helpful assistant...",
-  "model": "gpt-4o",
+  "provider": "openai" (optional, default: 'openai', supports: 'openai', 'gemini'),
+  "model": "gpt-5.2",
   "temperature": 0.7,
   "maxTokens": 1000
 }
@@ -162,7 +177,7 @@ Base Path: `/agents` (Requires Auth)
       "id": "a123-b456-c789",
       "name": "Support Bot",
       "systemPrompt": "You are a helpful assistant...",
-      "model": "gpt-4o",
+      "model": "gpt-5.2",
       "temperature": 0.7,
       "maxTokens": 1000,
       "userId": "u123-e456-i789",
@@ -187,7 +202,7 @@ Base Path: `/agents` (Requires Auth)
         "id": "a123-b456-c789",
         "name": "Support Bot",
         "systemPrompt": "...",
-        "model": "gpt-4o",
+        "model": "gpt-5.2",
         "temperature": 0.7,
         "maxTokens": 1000,
         "userId": "u123-e456-i789",
@@ -213,7 +228,7 @@ Base Path: `/agents` (Requires Auth)
       "id": "a123-b456-c789",
       "name": "Support Bot",
       "systemPrompt": "You are a helpful assistant...",
-      "model": "gpt-4o",
+      "model": "gpt-5.2",
       "temperature": 0.7,
       "maxTokens": 1000,
       "userId": "u123-e456-i789",
@@ -242,7 +257,8 @@ Base Path: `/agents` (Requires Auth)
       "id": "a123-b456-c789",
       "name": "Updated Bot Name",
       "systemPrompt": "New prompt...",
-      "model": "gpt-4o",
+      "provider": "gemini",
+      "model": "gemini-1.5-pro",
       "temperature": 0.8,
       "maxTokens": 1000,
       "userId": "u123-e456-i789",
@@ -367,7 +383,7 @@ Base Path: `/agents` (Requires Auth)
       "agent": {
         "id": "a123-b456-c789",
         "name": "Support Bot",
-        "model": "gpt-4o"
+        "model": "gpt-5.2"
       }
     }
   }
@@ -449,4 +465,80 @@ Base Path: `/metrics` (Requires Auth)
     ]
   }
 }
+
+---
+
+## 🔌 WebSockets (Socket.io)
+Base Path: `/metrics` (Requires Auth via token in `auth` object)
+
+### 1. Connection
+Connect to the `/metrics` namespace.
+```javascript
+const socket = io('http://localhost:5000/metrics', {
+  auth: { token: 'YOUR_JWT_TOKEN' }
+});
+```
+
+### 2. Events (Client to Server)
+- `subscribe:agent`: Subscribe to real-time metrics for a specific agent.
+    - Argument: `agentId` (string)
+- `unsubscribe:agent`: Stop receiving metrics for a specific agent.
+    - Argument: `agentId` (string)
+
+### 3. Events (Server to Client)
+- `metrics:update`: Received every 5 seconds for subscribed agents if new metrics are available.
+    - Payload:
+    ```json
+    {
+      "agentId": "a123...",
+      "metrics": [...],
+      "timestamp": "..."
+    }
+    ```
+- `error`: Received if something goes wrong (e.g., agent not found).
+
+---
+
+## 🛡️ Validation & Data Models
+The API uses **Joi** for request validation. Below are the key schemas applied to requests.
+
+### 1. User Schemas
+- **Sign Up**:
+    - `email`: Required, valid email format.
+    - `password`: Required, minimum 8 characters.
+    - `name`: Optional, 2-100 characters.
+- **Sign In**:
+    - `email`: Required, valid email format.
+    - `password`: Required.
+- **Reset Password**:
+    - `token`: Required.
+    - `password`: Required, minimum 8 characters.
+
+### 2. Agent Schemas
+- **Create Agent**:
+    - `name`: Required, 2-100 characters.
+    - `systemPrompt`: Required, 10-5000 characters.
+    - `provider`: Optional, `openai` or `gemini`.
+    - `model`: Optional, specific AI model ID. Valid models include:
+        - **OpenAI**: `gpt-5.2`, `gpt-5-mini`, `gpt-5-nano`, `gpt-5.2-pro`, `gpt-5`, `gpt-4.1`
+        - **Gemini**: `gemini-3.0-pro`, `gemini-3.0-flash`, `gemini-2.5-pro`, `gemini-2.5-flash`
+    - `temperature`: Optional, 0 to 2 (default 0.7).
+    - `maxTokens`: Optional, 100 to 8000.
+- **Update Agent**: Same as Create Agent but all fields are optional, plus:
+    - `isActive`: Optional boolean.
+
+### 3. Chat Schemas
+- **Send Message**:
+    - `message`: Required, 1-10000 characters.
+    - `conversationId`: Optional, valid UUID.
+
+---
+
+## 💾 Database & ORM
+The backend uses **Drizzle ORM** for database management.
+
+### Management Commands
+- `npm run db:generate`: Generate SQL migrations based on schema changes.
+- `npm run db:push`: Push schema changes directly to the database (useful for development).
+- `npm run db:studio`: Open Drizzle Studio to explore your data.
 ```

@@ -15,12 +15,28 @@ import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Send, ImageIcon, Sparkles, Plus, Trash2, MessageSquare, Paperclip, Wand2, Loader2 } from "lucide-react"
+
+
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { useIsMobile } from "@/components/ui/use-mobile"
+import {
+  Send,
+  ImageIcon,
+  Sparkles,
+  Plus,
+  Trash2,
+  MessageSquare,
+  Paperclip,
+  Wand2,
+  Loader2,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { AgentEditDialog } from "@/components/agent-edit-dialog"
 import { toast } from "sonner"
 import type { Agent } from "@/types"
+
 
 function ChatPageContent() {
   const dispatch = useAppDispatch()
@@ -164,109 +180,103 @@ function ChatPageContent() {
     dispatch(deleteConversation(id))
   }
 
-  return (
-    <div className="h-full flex gap-4 p-4 lg:p-6">
-      <div className="hidden lg:flex lg:w-64 xl:w-72 flex-col gap-4">
+  const ConversationsSidebar = ({ mobile = false }: { mobile?: boolean }) => (
+    <div className={cn("flex flex-col gap-4 h-full", mobile ? "w-full" : "w-full")}>
+      <div className="flex flex-col gap-4 flex-1">
         {/* Conversations List */}
-        {selectedAgentId && (
-          <GlassCard className="flex-1 flex flex-col overflow-hidden">
-            <div className="p-3 border-b border-white/10 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Conversations</h3>
-              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleNewConversation}>
-                <Plus className="h-4 w-4" />
-              </Button>
+        <GlassCard className="flex-1 flex flex-col overflow-hidden">
+
+          <div className="p-3 border-b border-white/10 flex items-center justify-between">
+            <h3 className="text-sm font-semibold">History</h3>
+            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleNewConversation}>
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          <ScrollArea className="flex-1">
+            <div className="p-2 space-y-1">
+              {!selectedAgentId ? (
+                <div className="text-center py-8 px-4">
+                  <Sparkles className="h-8 w-8 text-gray-600 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Select an agent</p>
+                  <p className="text-xs text-gray-500 mt-1">to see chat history</p>
+                </div>
+              ) : currentConversations.length === 0 ? (
+                <div className="text-center py-8 px-4">
+                  <MessageSquare className="h-8 w-8 text-gray-600 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">No conversations yet</p>
+                  <p className="text-xs text-gray-500 mt-1">Start chatting to create one</p>
+                </div>
+              ) : (
+                currentConversations.map((conv) => (
+                  <button
+                    key={conv.id}
+                    onClick={() => dispatch(fetchConversationById(conv.id))}
+                    className={cn(
+                      "w-full text-left p-3 rounded-lg transition-all text-sm group relative",
+                      "hover:bg-white/5",
+                      activeConversation?.id === conv.id
+                        ? "bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-500/30"
+                        : "border border-transparent",
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="truncate flex-1 font-medium">
+                        {conv.messages?.[0]?.content.slice(0, 30) || "New conversation"}...
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-5 w-5 flex-shrink-0 opacity-0 group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteConversation(conv.id)
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3 text-red-400" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      {conv.messages?.length || 0} messages • {new Date(conv.updatedAt).toLocaleDateString()}
+                    </p>
+                  </button>
+                ))
+              )}
             </div>
-            <ScrollArea className="flex-1">
-              <div className="p-2 space-y-1">
-                {currentConversations.length === 0 ? (
-                  <div className="text-center py-8 px-4">
-                    <MessageSquare className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-                    <p className="text-sm text-gray-400">No conversations yet</p>
-                    <p className="text-xs text-gray-500 mt-1">Start chatting to create one</p>
-                  </div>
-                ) : (
-                  currentConversations.map((conv) => (
-                    <button
-                      key={conv.id}
-                      onClick={() => dispatch(fetchConversationById(conv.id))}
-                      className={cn(
-                        "w-full text-left p-3 rounded-lg transition-all text-sm group relative",
-                        "hover:bg-white/5",
-                        activeConversation?.id === conv.id
-                          ? "bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-500/30"
-                          : "border border-transparent",
-                      )}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <span className="truncate flex-1 font-medium">
-                          {conv.messages?.[0]?.content.slice(0, 30) || "New conversation"}...
-                        </span>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-5 w-5 flex-shrink-0 opacity-0 group-hover:opacity-100"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteConversation(conv.id)
-                          }}
-                        >
-                          <Trash2 className="h-3 w-3 text-red-400" />
-                        </Button>
-                      </div>
-                      <p className="text-xs text-gray-400">
-                        {conv.messages?.length || 0} messages • {new Date(conv.updatedAt).toLocaleDateString()}
-                      </p>
-                    </button>
-                  ))
-                )}
-              </div>
-            </ScrollArea>
-          </GlassCard>
-        )}
+          </ScrollArea>
+        </GlassCard>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="h-full flex gap-4 p-4 lg:p-6 overflow-hidden">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex lg:w-64 xl:w-72 flex-col gap-4">
+        <ConversationsSidebar />
       </div>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="lg:hidden mb-4">
-          <Select
-            value={selectedAgentId || undefined}
-            onValueChange={(value) => {
-              if (value === "__new__") {
-                setEditingAgent(null)
-                setShowAgentDialog(true)
-              } else {
-                handleSelectAgent(value)
-              }
-            }}
-          >
-            <SelectTrigger className="w-full bg-white/5 border-white/10 hover:bg-white/10 h-12">
-              <SelectValue placeholder="Select an agent to chat..." />
-            </SelectTrigger>
-            <SelectContent className="bg-black/95 border-white/10">
-              {agents.map((agent: Agent) => (
-                <SelectItem key={agent.id} value={agent.id} className="focus:bg-white/10">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-teal-400" />
-                    <span className="font-medium">{agent.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-              <SelectItem value="__new__" className="focus:bg-white/10 border-t border-white/10 mt-1">
-                <div className="flex items-center gap-2 text-teal-400 font-semibold">
-                  <Plus className="h-4 w-4" />
-                  Create New Agent
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <GlassCard className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full">
+        <GlassCard className="flex-1 flex flex-col overflow-hidden relative">
           {/* Header */}
           <div className="flex items-center justify-between gap-3 p-4 border-b border-white/10">
             <div className="flex items-center gap-3 min-w-0">
+              {/* Mobile Sidebar Trigger */}
+              <div className="lg:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-400">
+                      <MessageSquare className="h-5 w-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-[300px] bg-black/95 border-white/10 p-6 pt-12">
+                    <ConversationsSidebar mobile />
+                  </SheetContent>
+                </Sheet>
+              </div>
+
               {selectedAgent ? (
                 <>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 flex-shrink-0">
+                  <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 flex-shrink-0">
                     <Sparkles className="h-5 w-5 text-white" />
                   </div>
                   <div className="min-w-0">
@@ -279,6 +289,7 @@ function ChatPageContent() {
               )}
             </div>
           </div>
+
 
           {/* Messages */}
           <ScrollArea className="flex-1 p-4 sm:p-6" ref={scrollRef}>
@@ -415,6 +426,7 @@ function ChatPageContent() {
                   </Select>
                 </div>
 
+
                 <Button
                   onClick={handleSend}
                   disabled={!input.trim() || !selectedAgent || isSending}
@@ -426,6 +438,7 @@ function ChatPageContent() {
               </div>
             </div>
           </div>
+
         </GlassCard>
       </div>
 

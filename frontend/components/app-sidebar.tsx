@@ -1,13 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAppDispatch, useAppSelector } from "@/lib/store/store"
+import { getProfile, profileSelector, logout } from "@/lib/store/slices/auth/profileSlice"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +23,7 @@ import {
   BarChart3,
   Settings,
   Sparkles,
-  User,
+  User as UserIcon,
   LogOut,
   UserCircle,
   ChevronLeft,
@@ -53,7 +55,19 @@ const routes = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+  const { user } = useAppSelector(profileSelector)
   const [collapsed, setCollapsed] = useState(false)
+
+  useEffect(() => {
+    dispatch(getProfile())
+  }, [dispatch])
+
+  const handleLogout = () => {
+    dispatch(logout())
+    router.push("/auth/sign-in")
+  }
 
   return (
     <div
@@ -75,7 +89,7 @@ export function AppSidebar() {
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className={cn("h-8 w-8 flex-shrink-0", collapsed && "mx-auto")}
+          className={cn("h-8 w-8 flex-shrink-0 hidden lg:flex", collapsed && "mx-auto")}
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
@@ -125,14 +139,21 @@ export function AppSidebar() {
             >
               <Avatar className="h-9 w-9 border-2 border-teal-500/50 flex-shrink-0">
                 <AvatarImage src="/abstract-geometric-shapes.png" alt="User" />
-                <AvatarFallback className="bg-gradient-to-br from-teal-400 to-emerald-500">
-                  <User className="h-4 w-4 text-white" />
+                <AvatarFallback className="bg-gradient-to-br from-teal-400 to-emerald-500 text-white font-semibold text-xs caps">
+                  {user?.name
+                    ? user.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2)
+                    : <UserIcon className="h-4 w-4" />}
                 </AvatarFallback>
               </Avatar>
               {!collapsed && (
                 <div className="flex flex-col items-start flex-1 min-w-0">
-                  <span className="text-sm font-medium truncate w-full">Alex Johnson</span>
-                  <span className="text-xs text-gray-400 truncate w-full">alex@nebula.ai</span>
+                  <span className="text-sm font-medium truncate w-full">{user?.name || "User"}</span>
+                  <span className="text-xs text-gray-400 truncate w-full">{user?.email || ""}</span>
                 </div>
               )}
             </Button>
@@ -149,7 +170,7 @@ export function AppSidebar() {
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem className="cursor-pointer text-red-400 focus:text-red-300">
+            <DropdownMenuItem className="cursor-pointer text-red-400 focus:text-red-300" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Logout
             </DropdownMenuItem>

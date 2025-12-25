@@ -1,6 +1,8 @@
 import { Response, NextFunction } from "express";
 import { verifyAccessToken } from "../utils/jwt";
-import { prisma } from "../config/database";
+import { db } from "../drizzle/db";
+import { users } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 import { AuthRequest } from "../types";
 
 export const authenticate = async (
@@ -22,9 +24,9 @@ export const authenticate = async (
     const token = authHeader.substring(7);
     const decoded = verifyAccessToken(token);
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, decoded.userId),
+      columns: {
         id: true,
         email: true,
         name: true,

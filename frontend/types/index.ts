@@ -23,6 +23,7 @@ export interface Agent {
   id: string
   name: string
   systemPrompt: string
+  provider?: 'openai' | 'gemini'
   model: string
   temperature: number
   maxTokens: number
@@ -31,6 +32,7 @@ export interface Agent {
   tools: string[]
   createdAt: string
   updatedAt: string
+
   _count?: {
     conversations: number
   }
@@ -77,6 +79,17 @@ export interface MetricsSummary {
   totalAgents: number
   period: string
 }
+
+export interface Metrics {
+  tokensProcessed: number
+  avgLatency: number
+  messageCount: number
+  errorRate: number
+  latencyHistory: Array<{ timestamp: Date | string, value: number }>
+  tokensHistory: Array<{ timestamp: Date | string, value: number }>
+  messagesHistory: Array<{ timestamp: Date | string, value: number }>
+}
+
 
 export interface MetricsResponse {
   summary: MetricsSummary

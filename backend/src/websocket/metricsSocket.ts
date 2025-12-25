@@ -1,9 +1,10 @@
-import { prisma } from "../config/database";
+import { db } from "../drizzle/db";
+import { users, agents, conversations, metrics } from "../drizzle/schema";
+import { eq, and, gte, desc, inArray } from "drizzle-orm";
 import { verifyAccessToken } from "../utils/jwt";
 import logger from "../utils/logger";
 import { Server, Socket } from 'socket.io';
 import { SocketData } from '../types';
-import { Conversation } from "../generated/prisma/client";
 
 interface SocketWithData extends Socket {
   data: SocketData;
@@ -21,8 +22,8 @@ export const setupMetricsSocket = (io: Server): void => {
       }
 
       const decoded = verifyAccessToken(token);
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, decoded.userId),
       });
 
       if (!user) {
@@ -41,11 +42,11 @@ export const setupMetricsSocket = (io: Server): void => {
 
     socket.on('subscribe:agent', async (agentId: string) => {
       try {
-        const agent = await prisma.agent.findFirst({
-          where: {
-            id: agentId,
-            userId: socket.data.userId,
-          },
+        const agent = await db.query.agents.findFirst({
+          where: and(
+            eq(agents.id, agentId),
+            eq(agents.userId, socket.data.userId)
+          ),
         });
 
         if (!agent) {
@@ -58,26 +59,27 @@ export const setupMetricsSocket = (io: Server): void => {
 
         const interval = setInterval(async () => {
           try {
-            const conversations = await prisma.conversation.findMany({
-              where: {
-                agentId,
-                userId: socket.data.userId,
-              },
-              select: { id: true },
+            const conversationsList = await db.query.conversations.findMany({
+              where: and(
+                eq(conversations.agentId, agentId),
+                eq(conversations.userId, socket.data.userId)
+              ),
+              columns: { id: true },
             });
 
-            const conversationIds = conversations.map((c: Conversation) => c.id);
+            const conversationIds = conversationsList.map((c) => c.id);
 
-            const recentMetrics = await prisma.metric.findMany({
-              where: {
-                conversationId: { in: conversationIds },
-                timestamp: {
-                  gte: new Date(Date.now() - 60000),
-                },
-              },
-              orderBy: { timestamp: 'desc' },
-              take: 10,
-            });
+            let recentMetrics: any[] = [];
+            if (conversationIds.length > 0) {
+              recentMetrics = await db.query.metrics.findMany({
+                where: and(
+                  inArray(metrics.conversationId, conversationIds),
+                  gte(metrics.timestamp, new Date(Date.now() - 60000))
+                ),
+                orderBy: [desc(metrics.timestamp)],
+                limit: 10,
+              });
+            }
 
             if (recentMetrics.length > 0) {
               socket.emit('metrics:update', {

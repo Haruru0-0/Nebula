@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import { GoogleGenAI } from "@google/genai";
 import logger from "../utils/logger";
 import { LLMResponse } from "../types";
-import { Agent, Message } from "../generated/prisma/client";
+import { Agent, Message } from "../drizzle/schema";
 import { config } from "../utils/config";
 
 // Initialize OpenAI
@@ -102,7 +102,7 @@ const sendMessageGemini = async (
       config: {
         temperature: agent.temperature,
         maxOutputTokens: agent.maxTokens,
-        systemInstruction: agent.systemPrompt, 
+        systemInstruction: agent.systemPrompt,
       },
       history,
     });
@@ -169,8 +169,8 @@ export const streamMessage = async (
   userMessage: string
 ): Promise<{
   stream:
-    | AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>
-    | AsyncIterable<any>;
+  | AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>
+  | AsyncIterable<any>;
   startTime: number;
   provider: string;
 }> => {
@@ -198,7 +198,7 @@ export const streamMessage = async (
       const result = await chat.sendMessageStream({ message: userMessage });
 
       return {
-        stream: result, 
+        stream: result,
         startTime,
         provider: "gemini",
       };

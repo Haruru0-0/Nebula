@@ -1,114 +1,108 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import type { Metrics, MetricPoint } from "@/types"
+import { io, Socket } from "socket.io-client"
+import secureLocalStorage from "react-secure-storage"
+import api from "@/lib/store/api"
+import { SERVER_ADDR } from "@/lib/store/constant"
+import type { Metrics, ApiResponse, MetricsResponse } from "@/types"
 
 const INITIAL_METRICS: Metrics = {
-  tokensProcessed: 1250000,
-  avgLatency: 145,
-  messageCount: 8432,
-  errorRate: 0.02,
+  tokensProcessed: 0,
+  avgLatency: 0,
+  messageCount: 0,
+  errorRate: 0,
   latencyHistory: [],
   tokensHistory: [],
   messagesHistory: [],
 }
 
-function generateDataPoint(baseValue: number, variance: number): number {
-  return Math.max(0, baseValue + (Math.random() - 0.5) * variance)
-}
-
 export function useLiveMetrics(timeRange: "1m" | "5m" | "15m" = "5m") {
   const [metrics, setMetrics] = useState<Metrics>(INITIAL_METRICS)
   const [isPaused, setIsPaused] = useState(false)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const socketRef = useRef<Socket | null>(null)
 
   const maxDataPoints = timeRange === "1m" ? 30 : timeRange === "5m" ? 150 : 450
 
-  const updateMetrics = useCallback(() => {
-    setMetrics((prev) => {
-      const now = new Date()
-
-      const newLatencyPoint: MetricPoint = {
-        timestamp: now,
-        value: generateDataPoint(prev.avgLatency, 40),
+  const fetchInitialMetrics = useCallback(async () => {
+    try {
+      const periodMap = {
+        "1m": "1h",
+        "5m": "24h",
+        "15m": "7d",
       }
+      const response = await api.get<ApiResponse<MetricsResponse>>(`/metrics/overall?period=${periodMap[timeRange]}`)
+      const { summary, metrics: history } = response.data.data
 
-      const newTokensPoint: MetricPoint = {
-        timestamp: now,
-        value: generateDataPoint(5000, 2000),
-      }
+      setMetrics({
+        tokensProcessed: summary.totalTokensProcessed,
+        avgLatency: summary.averageLatency,
+        messageCount: summary.totalMessages,
+        errorRate: 0,
+        latencyHistory: history.map(m => ({ timestamp: new Date(m.timestamp), value: m.responseLatency })).slice(-maxDataPoints),
+        tokensHistory: history.map(m => ({ timestamp: new Date(m.timestamp), value: m.tokensProcessed })).slice(-maxDataPoints),
+        messagesHistory: history.map(m => ({ timestamp: new Date(m.timestamp), value: m.messageCount })).slice(-maxDataPoints),
+      })
+    } catch (error) {
+      console.error("Failed to fetch initial metrics:", error)
+    }
+  }, [timeRange, maxDataPoints])
 
-      const newMessagesPoint: MetricPoint = {
-        timestamp: now,
-        value: generateDataPoint(10, 5),
-      }
+  useEffect(() => {
+    fetchInitialMetrics()
 
-      const latencyHistory = [...prev.latencyHistory, newLatencyPoint].slice(-maxDataPoints)
-      const tokensHistory = [...prev.tokensHistory, newTokensPoint].slice(-maxDataPoints)
-      const messagesHistory = [...prev.messagesHistory, newMessagesPoint].slice(-maxDataPoints)
+    const interval = setInterval(() => {
+      if (!isPaused) fetchInitialMetrics()
+    }, 15000)
 
-      return {
-        ...prev,
-        tokensProcessed: prev.tokensProcessed + newTokensPoint.value,
-        avgLatency: newLatencyPoint.value,
-        messageCount: prev.messageCount + Math.floor(newMessagesPoint.value),
-        latencyHistory,
-        tokensHistory,
-        messagesHistory,
-      }
+    return () => clearInterval(interval)
+  }, [fetchInitialMetrics, isPaused])
+
+  useEffect(() => {
+    if (isPaused) {
+      socketRef.current?.disconnect()
+      socketRef.current = null
+      return
+    }
+
+    const token = secureLocalStorage.getItem("accessToken")
+    const socketUrl = SERVER_ADDR.replace("/api", "")
+
+    const socket = io(`${socketUrl}/metrics`, {
+      auth: { token },
     })
-  }, [maxDataPoints])
 
-  useEffect(() => {
-    // Initialize with some data
-    const initialHistory: MetricPoint[] = []
-    const now = Date.now()
-    for (let i = 30; i >= 0; i--) {
-      initialHistory.push({
-        timestamp: new Date(now - i * 2000),
-        value: generateDataPoint(145, 40),
+    socketRef.current = socket
+
+    socket.on("metrics:update", (data: { metrics: any[], timestamp: string }) => {
+      setMetrics((prev) => {
+        const newest = data.metrics[data.metrics.length - 1]
+        if (!newest) return prev
+
+        const newLatencyPoint = { timestamp: new Date(data.timestamp), value: newest.responseLatency }
+        const newTokensPoint = { timestamp: new Date(data.timestamp), value: newest.tokensProcessed }
+        const newMessagesPoint = { timestamp: new Date(data.timestamp), value: newest.messageCount }
+
+        const latencyHistory = [...prev.latencyHistory, newLatencyPoint].slice(-maxDataPoints)
+        const tokensHistory = [...prev.tokensHistory, newTokensPoint].slice(-maxDataPoints)
+        const messagesHistory = [...prev.messagesHistory, newMessagesPoint].slice(-maxDataPoints)
+
+        return {
+          ...prev,
+          tokensProcessed: newest.totalTokensProcessed || (prev.tokensProcessed + newest.tokensProcessed),
+          avgLatency: newest.averageLatency || newest.responseLatency,
+          messageCount: newest.totalMessages || (prev.messageCount + newest.messageCount),
+          latencyHistory,
+          tokensHistory,
+          messagesHistory,
+        }
       })
-    }
-
-    const initialTokens: MetricPoint[] = []
-    for (let i = 30; i >= 0; i--) {
-      initialTokens.push({
-        timestamp: new Date(now - i * 2000),
-        value: generateDataPoint(5000, 2000),
-      })
-    }
-
-    const initialMessages: MetricPoint[] = []
-    for (let i = 30; i >= 0; i--) {
-      initialMessages.push({
-        timestamp: new Date(now - i * 2000),
-        value: generateDataPoint(10, 5),
-      })
-    }
-
-    setMetrics((prev) => ({
-      ...prev,
-      latencyHistory: initialHistory,
-      tokensHistory: initialTokens,
-      messagesHistory: initialMessages,
-    }))
-  }, [])
-
-  useEffect(() => {
-    if (!isPaused) {
-      intervalRef.current = setInterval(updateMetrics, 2000)
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-    }
+    })
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
+      socket.disconnect()
     }
-  }, [isPaused, updateMetrics])
+  }, [isPaused, maxDataPoints])
 
   const togglePause = useCallback(() => {
     setIsPaused((prev) => !prev)

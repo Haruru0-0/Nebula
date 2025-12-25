@@ -1,5 +1,7 @@
 import { Response, NextFunction } from 'express';
-import {prisma} from '../config/database';
+import { db } from '../drizzle/db';
+import { users } from '../drizzle/schema';
+import { eq, gt, and } from 'drizzle-orm';
 import { hashPassword, comparePassword, generateResetToken, hashResetToken } from '../utils/crypto';
 import { signAccessToken, signRefreshToken } from '../utils/jwt';
 import { sendPasswordResetEmail } from '../services/emailService';
@@ -14,8 +16,8 @@ export const signUp = async (
   try {
     const { email, password, name } = req.body as SignUpBody;
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.email, email),
     });
 
     if (existingUser) {
@@ -28,18 +30,15 @@ export const signUp = async (
 
     const hashedPassword = await hashPassword(password);
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name: name || null,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        createdAt: true,
-      },
+    const [user] = await db.insert(users).values({
+      email,
+      password: hashedPassword,
+      name: name || null,
+    }).returning({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      createdAt: users.createdAt,
     });
 
     const accessToken = signAccessToken(user.id);
@@ -69,8 +68,8 @@ export const signIn = async (
   try {
     const { email, password } = req.body as SignInBody;
 
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await db.query.users.findFirst({
+      where: eq(users.email, email),
     });
 
     if (!user) {
@@ -122,8 +121,8 @@ export const forgotPassword = async (
   try {
     const { email } = req.body as ForgotPasswordBody;
 
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await db.query.users.findFirst({
+      where: eq(users.email, email),
     });
 
     if (!user) {
@@ -138,13 +137,12 @@ export const forgotPassword = async (
     const hashedToken = hashResetToken(resetToken);
     const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
+    await db.update(users)
+      .set({
         resetToken: hashedToken,
-        resetTokenExpiry,
-      },
-    });
+        resetTokenExpiry: resetTokenExpiry,
+      })
+      .where(eq(users.id, user.id));
 
     await sendPasswordResetEmail(email, resetToken);
 
@@ -169,13 +167,11 @@ export const resetPassword = async (
 
     const hashedToken = hashResetToken(token);
 
-    const user = await prisma.user.findFirst({
-      where: {
-        resetToken: hashedToken,
-        resetTokenExpiry: {
-          gt: new Date(),
-        },
-      },
+    const user = await db.query.users.findFirst({
+      where: and(
+        eq(users.resetToken, hashedToken),
+        gt(users.resetTokenExpiry, new Date())
+      ),
     });
 
     if (!user) {
@@ -188,14 +184,13 @@ export const resetPassword = async (
 
     const hashedPassword = await hashPassword(password);
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
+    await db.update(users)
+      .set({
         password: hashedPassword,
         resetToken: null,
         resetTokenExpiry: null,
-      },
-    });
+      })
+      .where(eq(users.id, user.id));
 
     logger.info(`Password reset successful for user: ${user.email}`);
 
@@ -214,9 +209,9 @@ export const getProfile = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user!.id },
-      select: {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, req.user!.id),
+      columns: {
         id: true,
         email: true,
         name: true,
