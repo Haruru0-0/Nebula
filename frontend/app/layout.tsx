@@ -11,23 +11,13 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Nebula - AI Agent Control Center",
   description: "Configure agents, chat with LLMs, and monitor performance metrics in real time.",
-  generator: "v0.app",
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/icon.png",
       },
     ],
-    apple: "/apple-icon.png",
+    apple: "/icon.png",
   },
 }
 

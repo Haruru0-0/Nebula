@@ -1,6 +1,6 @@
 # Nebula - AI Agent Control Center
 
-![Nebula Logo](./frontend/public/icon.svg)
+![Nebula Logo](./frontend/public/icon.png)
 
 Nebula is a comprehensive AI Agent Management Platform that enables users to create, configure, and monitor AI agents powered by large language models (LLMs). The platform provides real-time analytics, secure authentication, and seamless integration with multiple LLM providers.
 
