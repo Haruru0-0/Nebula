@@ -51,7 +51,7 @@ app.get("/health", (_, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/agents", agentRoutes);
-app.use("/api/agents", chatRoutes);
+app.use("/api/chat", chatRoutes);
 app.use("/api/metrics", metricsRoutes);
 
 app.use(notFound);

@@ -247,7 +247,7 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-zinc-950 border-white/10 max-w-2xl h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl">
+        <DialogContent className="bg-zinc-950 border-white/10 max-w-2xl h-[90vh] !flex flex-col p-0 overflow-hidden shadow-2xl">
           <DialogHeader className="p-8 pb-4 flex-shrink-0 border-b border-white/5">
             <DialogTitle className="text-3xl font-bold tracking-tight">
               {agent ? "Edit Agent" : "Create New Agent"}
@@ -257,7 +257,7 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="flex-1 p-8">
+          <ScrollArea className="flex-1 min-h-0 px-8">
             <AgentEditForm
               key={agent?.id || "new"}
               agent={agent}
@@ -308,7 +308,7 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
           <DrawerDescription className="text-zinc-400">Configure your AI assistant.</DrawerDescription>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4 min-h-0 custom-scrollbar">
+        <ScrollArea className="flex-1 min-h-0 px-6 py-4">
           <AgentEditForm
             key={agent?.id || "new"}
             agent={agent}
@@ -316,7 +316,7 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
             onClose={() => onOpenChange(false)}
             isLoading={isLoading}
           />
-        </div>
+        </ScrollArea>
 
         <DrawerFooter className="p-6 pt-4 pb-12 border-t border-white/10 flex-shrink-0 flex flex-row gap-3 bg-black/60 backdrop-blur-md">
           <Button

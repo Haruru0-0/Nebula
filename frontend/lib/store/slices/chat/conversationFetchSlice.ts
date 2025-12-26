@@ -21,7 +21,7 @@ export const fetchConversations = createAppAsyncThunk(
     "chat/fetchConversations",
     async (agentId: string, thunkAPI) => {
         try {
-            const response = await api.get<ApiResponse<{ conversations: Conversation[] }>>(`/agents/${agentId}/conversations`);
+            const response = await api.get<ApiResponse<{ conversations: Conversation[] }>>(`/chat/${agentId}/conversations`);
             return response.data.data.conversations;
         } catch (e: any) {
             return thunkAPI.rejectWithValue(e.response?.data?.message || "Failed to fetch conversations");

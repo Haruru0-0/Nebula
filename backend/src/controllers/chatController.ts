@@ -84,28 +84,32 @@ export const chat = async (
       // Create new conversation with validation
       try {
         const conversationTitle = message.length > 50 ? message.substring(0, 50) : message;
-        
-        // Use transaction for better data integrity
-        const [newConversation] = await db.transaction(async (tx) => {
-          // Double-check agent ownership within transaction
-          const agentCheck = await tx.query.agents.findFirst({
-            where: and(
-              eq(agents.id, agentId),
-              eq(agents.userId, req.user!.id)
-            ),
-          });
 
-          if (!agentCheck) {
-            throw new Error('Agent validation failed in transaction');
-          }
+        // // Use transaction for better data integrity
+        // const [newConversation] = await db.transaction(async (tx) => {
+        //   // Double-check agent ownership within transaction
+        //   const agentCheck = await tx.query.agents.findFirst({
+        //     where: and(
+        //       eq(agents.id, agentId),
+        //       eq(agents.userId, req.user!.id)
+        //     ),
+        //   });
 
-          return await tx.insert(conversations).values({
-            userId: req.user!.id,
-            agentId,
-            title: conversationTitle,
-          }).returning();
-        });
+        //   if (!agentCheck) {
+        //     throw new Error('Agent validation failed in transaction');
+        //   }
 
+        //   return await tx.insert(conversations).values({
+        //     userId: req.user!.id,
+        //     agentId,
+        //     title: conversationTitle,
+        //   }).returning();
+        // });
+        const [newConversation] = await db.insert(conversations).values({
+          userId: req.user!.id,
+          agentId,
+          title: conversationTitle,
+        }).returning();
         logger.info(`New conversation created: ${newConversation.id} for user ${req.user!.id}`);
 
         conversation = {

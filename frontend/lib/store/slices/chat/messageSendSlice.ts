@@ -23,7 +23,7 @@ export const sendMessage = createAppAsyncThunk(
     "chat/sendMessage",
     async ({ agentId, message, conversationId }: { agentId: string, message: string, conversationId?: string }, thunkAPI) => {
         try {
-            const response = await api.post<ApiResponse<{ conversationId: string, message: ChatMessage }>>(`/agents/${agentId}/chat`, {
+            const response = await api.post<ApiResponse<{ conversationId: string, message: ChatMessage }>>(`/chat/${agentId}`, {
                 message,
                 conversationId
             });

@@ -20,7 +20,7 @@ export const deleteConversation = createAppAsyncThunk(
     "chat/delete",
     async (conversationId: string, thunkAPI) => {
         try {
-            await api.delete(`/conversations/${conversationId}`);
+            await api.delete(`/chat/conversations/${conversationId}/delete`);
             return conversationId;
         } catch (e: any) {
             return thunkAPI.rejectWithValue(e.response?.data?.message || "Failed to delete conversation");

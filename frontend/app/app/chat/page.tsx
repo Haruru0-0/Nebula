@@ -88,7 +88,7 @@ function ChatPageContent() {
     if (currentConversations.length > 0 && !activeConversation && !isFetchingDetail) {
       dispatch(fetchConversationById(currentConversations[currentConversations.length - 1].id))
     }
-  }, [currentConversations, activeConversation, isFetchingDetail, dispatch])
+  }, [])
 
   // Operation Handlers
   useEffect(() => {
@@ -292,7 +292,7 @@ function ChatPageContent() {
 
 
           {/* Messages */}
-          <ScrollArea className="flex-1 p-4 sm:p-6" ref={scrollRef}>
+          <ScrollArea className="flex-1 min-h-0 px-4 pb-2" ref={scrollRef}>
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-teal-400/20 to-emerald-500/20 mb-4">
