@@ -101,3 +101,7 @@
 {"level":"info","message":"Metrics WebSocket connected: FukX1OdpPFiDGHHVAAAF for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 13:08:31"}
 {"level":"info","message":"Gemini Response - Model: gemini-2.5-flash, Tokens: 3260, Latency: 10584ms","service":"ai-agent-backend","timestamp":"2025-12-26 13:09:36"}
 {"level":"info","message":"Chat message processed successfully for conversation: 290a2b7b-8800-4774-b35b-488048817eaf","service":"ai-agent-backend","timestamp":"2025-12-26 13:09:38"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 14:09:53"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 14:09:53"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 14:09:53"}
+{"level":"info","message":"Metrics WebSocket connected: WB0XYsyrEXLMItceAAAB for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:09:57"}

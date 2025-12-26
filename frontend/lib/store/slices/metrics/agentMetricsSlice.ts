@@ -19,7 +19,7 @@ const initialState: AgentMetricsState = {
 
 export const fetchAgentMetrics = createAppAsyncThunk(
     "metrics/fetchAgent",
-    async ({ agentId, period = "24h" }: { agentId: string, period?: string }, thunkAPI) => {
+    async ({ agentId, period }: { agentId: string, period?: string }, thunkAPI) => {
         try {
             const response = await api.get<ApiResponse<MetricsResponse>>(`/metrics/${agentId}`, {
                 params: { period }

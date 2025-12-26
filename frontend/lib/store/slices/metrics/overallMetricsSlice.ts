@@ -19,7 +19,7 @@ const initialState: OverallMetricsState = {
 
 export const fetchOverallMetrics = createAppAsyncThunk(
     "metrics/fetchOverall",
-    async (period: string = "24h", thunkAPI) => {
+    async (period: string, thunkAPI) => {
         try {
             const response = await api.get<ApiResponse<MetricsResponse>>(`/metrics/overall`, {
                 params: { period }
