@@ -1,7 +1,9 @@
 "use client"
 
-import type React from "react"
 import { useState, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import {
   Dialog,
@@ -23,13 +25,20 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import type { Agent } from "@/types"
 
 interface AgentEditDialogProps {
@@ -40,29 +49,31 @@ interface AgentEditDialogProps {
   isLoading?: boolean
 }
 
+const formSchema = z.object({
+  name: z.string().min(1, {
+    message: "Agent name is required.",
+  }),
+  systemPrompt: z.string().min(1, {
+    message: "System prompt is required.",
+  }),
+  provider: z.enum(["openai", "gemini"], {
+    required_error: "Please select a provider.",
+  }),
+  model: z.string().min(1, {
+    message: "Please select a model.",
+  }),
+  temperature: z.number().min(0).max(1),
+  maxTokens: z.number().min(1).max(10000),
+  tools: z.array(z.string()),
+})
+
 function AgentEditForm({
   agent,
   onSave,
   onClose,
   isLoading,
 }: { agent: Agent | null; onSave: (data: Partial<Agent>) => void; onClose: () => void; isLoading?: boolean }) {
-  const [formData, setFormData] = useState<Partial<Agent>>(() => {
-    if (agent) {
-      return {
-        ...agent,
-        provider: agent.provider || "openai",
-      }
-    }
-    return {
-      name: "",
-      systemPrompt: "",
-      provider: "openai",
-      model: "gpt-5.2",
-      temperature: 0.7,
-      maxTokens: 2000,
-      tools: [],
-    }
-  })
+  const [availableModels, setAvailableModels] = useState<Array<{ id: string; name: string }>>([])
 
   const modelsByProvider = {
     openai: [
@@ -81,164 +92,179 @@ function AgentEditForm({
     ],
   }
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: agent?.name || "",
+      systemPrompt: agent?.systemPrompt || "",
+      provider: (agent?.provider as "openai" | "gemini") || "openai",
+      model: agent?.model || "gpt-5.2",
+      temperature: agent?.temperature || 0.7,
+      maxTokens: agent?.maxTokens || 2000,
+      tools: agent?.tools || [],
+    },
+  })
+
+  // Update available models when provider changes
+  const watchedProvider = form.watch("provider")
   useEffect(() => {
-    const availableModels = modelsByProvider[formData.provider as keyof typeof modelsByProvider]
-    if (availableModels && availableModels.length > 0) {
-      const currentModel = availableModels.find(model => model.id === formData.model)
-      if (!currentModel) {
-        // If current model is not available for this provider, use the first model
-        setFormData((prev) => ({
-          ...prev,
-          model: availableModels[0].id,
-        }))
-      }
+    const models = modelsByProvider[watchedProvider] || modelsByProvider.openai
+    setAvailableModels(models)
+    
+    // If current model is not available in the new provider, reset to first model
+    const currentModel = form.getValues("model")
+    const modelExists = models.some(model => model.id === currentModel)
+    if (!modelExists && models.length > 0) {
+      form.setValue("model", models[0].id)
     }
-  }, [formData.provider, formData.model])
+  }, [watchedProvider, form])
 
-  const handleProviderChange = (provider: "openai" | "gemini") => {
-    setFormData({
-      ...formData,
-      provider,
-      model: modelsByProvider[provider][0].id,
-    })
-  }
+  // Initialize available models on component mount
+  useEffect(() => {
+    const provider = form.getValues("provider")
+    const models = modelsByProvider[provider] || modelsByProvider.openai
+    setAvailableModels(models)
+  }, [form])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSave(formData)
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    onSave(values)
     onClose()
   }
 
   return (
-    <form id="agent-form" onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name" className="text-zinc-400 mb-1.5 block">
-            Agent Name
-          </Label>
-          <Input
-            id="name"
-            value={formData.name || ""}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="e.g., Content Writer"
-            className="bg-white/5 border-white/10 h-11 focus:ring-teal-500/20"
-            required
+    <Form {...form}>
+      <form id="agent-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-zinc-400">Agent Name</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="e.g., Content Writer" 
+                    className="bg-white/5 border-white/10 h-11 focus:ring-teal-500/20" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="provider"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-zinc-400">AI Provider</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-white/5 border-white/10 h-11">
+                      <SelectValue placeholder="Select a provider" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-black/95 border-white/10">
+                    <SelectItem value="openai">OpenAI</SelectItem>
+                    <SelectItem value="gemini">Google Gemini</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-        <div>
-          <Label htmlFor="provider" className="text-zinc-400 mb-1.5 block">
-            AI Provider
-          </Label>
-          <Select
-            value={formData.provider || "openai"}
-            onValueChange={(value: "openai" | "gemini") => handleProviderChange(value)}
-          >
-            <SelectTrigger id="provider" className="bg-white/5 border-white/10 h-11">
-              <SelectValue placeholder="Select a provider" />
-            </SelectTrigger>
-            <SelectContent className="bg-black/95 border-white/10">
-              <SelectItem value="openai">OpenAI</SelectItem>
-              <SelectItem value="gemini">Google Gemini</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
 
-      <div>
-        <Label htmlFor="prompt" className="text-zinc-400 mb-1.5 block">
-          System Prompt
-        </Label>
-        <Textarea
-          id="prompt"
-          value={formData.systemPrompt || ""}
-          onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value })}
-          placeholder="Define how your agent should behave..."
-          rows={8}
-          className="bg-white/5 border-white/10 resize-none focus:ring-teal-500/20"
-          required
+        <FormField
+          control={form.control}
+          name="systemPrompt"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-zinc-400">System Prompt</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Define how your agent should behave..."
+                  rows={8}
+                  className="bg-white/5 border-white/10 resize-none focus:ring-teal-500/20"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="model" className="text-zinc-400 mb-1.5 block">
-            Model
-          </Label>
-          <Select
-            key={`model-${formData.provider}`}
-            value={formData.model}
-            onValueChange={(value) => setFormData({ ...formData, model: value })}
-          >
-            <SelectTrigger id="model" className="bg-white/5 border-white/10 h-11">
-              <SelectValue placeholder="Select a model" />
-            </SelectTrigger>
-            <SelectContent className="bg-black/95 border-white/10 border-teal-500/20">
-              {(modelsByProvider[formData.provider as keyof typeof modelsByProvider] || modelsByProvider.openai).map(
-                (model) => (
-                  <SelectItem key={model.id} value={model.id}>
-                    {model.name}
-                  </SelectItem>
-                ),
-              )}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="maxTokens" className="text-zinc-400 mb-1.5 block">
-            Max Tokens
-          </Label>
-          <Input
-            id="maxTokens"
-            type="number"
-            value={formData.maxTokens || 2000}
-            onChange={(e) => setFormData({ ...formData, maxTokens: Number.parseInt(e.target.value) })}
-            className="bg-white/5 border-white/10 h-11 focus:ring-teal-500/20"
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="model"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-zinc-400">Model</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-white/5 border-white/10 h-11">
+                      <SelectValue placeholder="Select a model" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-black/95 border-white/10 border-teal-500/20">
+                    {availableModels.map((model) => (
+                      <SelectItem key={model.id} value={model.id}>
+                        {model.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="maxTokens"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-zinc-400">Max Tokens</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    className="bg-white/5 border-white/10 h-11 focus:ring-teal-500/20"
+                    {...field}
+                    onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-      </div>
 
-      <div>
-        <Label htmlFor="temperature" className="text-zinc-400 mb-1.5 block">
-          Temperature: {formData.temperature?.toFixed(1) || "0.7"}
-        </Label>
-        <Slider
-          id="temperature"
-          value={[formData.temperature || 0.7]}
-          onValueChange={([value]) => setFormData({ ...formData, temperature: value })}
-          min={0}
-          max={1}
-          step={0.1}
-          className="mt-2"
+        <FormField
+          control={form.control}
+          name="temperature"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-zinc-400">
+                Temperature: {field.value.toFixed(1)}
+              </FormLabel>
+              <FormControl>
+                <Slider
+                  value={[field.value]}
+                  onValueChange={([value]) => field.onChange(value)}
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  className="mt-2"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-
-      <div>
-        <Label className="text-zinc-400 mb-1.5 block">Capabilities</Label>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {["Web", "Files", "Code", "Vision"].map((tool) => (
-            <Badge
-              key={tool}
-              variant={formData.tools?.includes(tool) ? "default" : "outline"}
-              className={cn(
-                "cursor-pointer px-4 py-2 text-sm transition-all duration-200",
-                formData.tools?.includes(tool)
-                  ? "bg-teal-500 text-black hover:bg-teal-400 shadow-lg shadow-teal-500/20"
-                  : "hover:bg-white/10 border-white/10 text-zinc-400",
-              )}
-              onClick={() => {
-                const tools = formData.tools || []
-                setFormData({
-                  ...formData,
-                  tools: tools.includes(tool) ? tools.filter((t) => t !== tool) : [...tools, tool],
-                })
-              }}
-            >
-              {tool}
-            </Badge>
-          ))}
-        </div>
-      </div>
-    </form>
+      </form>
+    </Form>
   )
 }
 
@@ -349,4 +375,3 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
     </Drawer>
   )
 }
-

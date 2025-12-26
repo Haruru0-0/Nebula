@@ -49,7 +49,7 @@ export default function LandingPage() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="bg-black/95 border-white/10" title="Navigation Menu" description="Main navigation menu for mobile">
-              <div className="flex flex-col gap-6 mt-8">
+              <div className="flex flex-col gap-6 mt-8 px-6">
                 <a href="#process" className="text-lg text-gray-400 hover:text-white transition-colors">
                   Process
                 </a>
