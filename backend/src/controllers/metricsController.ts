@@ -1,7 +1,8 @@
 import { db } from "../drizzle/db";
 import { agents, conversations, metrics } from "../drizzle/schema";
 import { eq, and, gte, asc, inArray, sql } from "drizzle-orm";
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
+import { AuthRequest } from "../types";
 
 const periodMap = {
   "1h": 1,
@@ -18,9 +19,10 @@ function getPeriod(query: unknown): Period {
   return "24h";
 }
 
-const getMetrics = async (req: Request, res: Response, next: NextFunction) => {
+const getMetrics = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { agentId, userId } = req.params;
+    const { agentId } = req.params;
+    const userId = req.user!.id;
 
     const period = getPeriod(req.query.period);
     const hoursAgo = periodMap[period];
@@ -84,9 +86,9 @@ const getMetrics = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const getOverallMetrics = async (req: Request, res: Response, next: NextFunction) => {
+const getOverallMetrics = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user!.id;
 
     const period = getPeriod(req.query.period);
     const hoursAgo = periodMap[period];

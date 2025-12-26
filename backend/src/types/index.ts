@@ -33,6 +33,20 @@ export interface ResetPasswordBody {
   password: string;
 }
 
+export interface ChangePasswordBody {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface VerifyEmailBody {
+  token: string;
+  email: string;
+}
+
+export interface ResendVerificationBody {
+  email: string;
+}
+
 export interface CreateAgentBody {
   name: string;
   systemPrompt: string;

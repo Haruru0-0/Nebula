@@ -105,3 +105,116 @@
 {"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 14:09:53"}
 {"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 14:09:53"}
 {"level":"info","message":"Metrics WebSocket connected: WB0XYsyrEXLMItceAAAB for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:09:57"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 14:14:32"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 14:14:32"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 14:14:32"}
+{"level":"info","message":"Metrics WebSocket connected: ZVc4fidGs63GjyucAAAB for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:14:35"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:15:32"}
+{"level":"info","message":"Metrics WebSocket connected: lCZAYK_0h_aW4VDNAAAD for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:15:32"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to overall metrics","service":"ai-agent-backend","timestamp":"2025-12-26 14:15:32"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:16:34"}
+{"level":"info","message":"Metrics WebSocket connected: VFoyeluZqSt8PT0lAAAF for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:16:35"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a unsubscribed from overall metrics","service":"ai-agent-backend","timestamp":"2025-12-26 14:16:35"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to agent 861cf916-dad4-49ce-b179-a8e100832d4e","service":"ai-agent-backend","timestamp":"2025-12-26 14:16:35"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 14:21:02"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 14:21:02"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 14:21:02"}
+{"level":"info","message":"Metrics WebSocket connected: gSVdo-fble2AIlj3AAAB for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:21:04"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:12"}
+{"level":"info","message":"Metrics WebSocket connected: YXCyASytn_6AwrpJAAAD for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:12"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a unsubscribed from agent 861cf916-dad4-49ce-b179-a8e100832d4e","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:12"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to overall metrics","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:12"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:25"}
+{"level":"info","message":"Metrics WebSocket connected: bLRob5boJ7OCDhyYAAAF for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:25"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a unsubscribed from overall metrics","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:25"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to agent 861cf916-dad4-49ce-b179-a8e100832d4e","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:26"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:54"}
+{"level":"info","message":"Metrics WebSocket connected: Qo8YgVi1igINToN8AAAH for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:54"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to agent 861cf916-dad4-49ce-b179-a8e100832d4e","service":"ai-agent-backend","timestamp":"2025-12-26 14:23:55"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:00"}
+{"level":"info","message":"Metrics WebSocket connected: gdkBES3437c-GfCCAAAJ for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:01"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to agent 861cf916-dad4-49ce-b179-a8e100832d4e","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:01"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:01"}
+{"level":"info","message":"Metrics WebSocket connected: Svhb5kQM6P-YW7plAAAL for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:01"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to agent 861cf916-dad4-49ce-b179-a8e100832d4e","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:01"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:06"}
+{"level":"info","message":"Metrics WebSocket connected: kwEm7XHR3KcOfojdAAAN for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:06"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to agent 861cf916-dad4-49ce-b179-a8e100832d4e","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:06"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:12"}
+{"level":"info","message":"Metrics WebSocket connected: bIk7v91yt1xqeFQBAAAP for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:13"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to agent 861cf916-dad4-49ce-b179-a8e100832d4e","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:13"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:15"}
+{"level":"info","message":"Metrics WebSocket connected: y7oTDDrmqnrIwqjzAAAR for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:15"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to agent 861cf916-dad4-49ce-b179-a8e100832d4e","service":"ai-agent-backend","timestamp":"2025-12-26 14:24:15"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:25:00"}
+{"level":"info","message":"Metrics WebSocket connected: J5h7wKwY2ahnnwqNAAAT for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:25:02"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to agent 861cf916-dad4-49ce-b179-a8e100832d4e","service":"ai-agent-backend","timestamp":"2025-12-26 14:25:02"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:29:09"}
+{"level":"info","message":"New conversation created: 480f4b61-61bb-421a-b803-134798dbb51f for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:30:38"}
+{"level":"info","message":"Gemini Response - Model: gemini-2.5-flash, Tokens: 69, Latency: 1108ms","service":"ai-agent-backend","timestamp":"2025-12-26 14:30:39"}
+{"level":"info","message":"Chat message processed successfully for conversation: 480f4b61-61bb-421a-b803-134798dbb51f","service":"ai-agent-backend","timestamp":"2025-12-26 14:30:39"}
+{"level":"info","message":"Metrics WebSocket connected: frvdUFZcj_aragKfAAAW for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 14:31:30"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to overall metrics","service":"ai-agent-backend","timestamp":"2025-12-26 14:31:30"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 14:42:20"}
+{"level":"info","message":"Gemini Response - Model: gemini-2.5-flash, Tokens: 123, Latency: 1888ms","service":"ai-agent-backend","timestamp":"2025-12-26 15:38:51"}
+{"level":"info","message":"Chat message processed successfully for conversation: 480f4b61-61bb-421a-b803-134798dbb51f","service":"ai-agent-backend","timestamp":"2025-12-26 15:38:51"}
+{"level":"info","message":"Conversation deleted: 290a2b7b-8800-4774-b35b-488048817eaf","service":"ai-agent-backend","timestamp":"2025-12-26 15:47:04"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 15:52:07"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 15:52:07"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 15:52:07"}
+{"level":"info","message":"Conversation renamed: 480f4b61-61bb-421a-b803-134798dbb51f to \"Sign in page\"","service":"ai-agent-backend","timestamp":"2025-12-26 15:58:20"}
+{"level":"info","message":"Conversation deleted: 480f4b61-61bb-421a-b803-134798dbb51f","service":"ai-agent-backend","timestamp":"2025-12-26 16:03:45"}
+{"level":"info","message":"New conversation created: 94b3d67c-6a0b-4f92-a320-c80c716f8ade for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 16:04:12"}
+{"level":"info","message":"Gemini Response - Model: gemini-2.5-flash, Tokens: 67, Latency: 1230ms","service":"ai-agent-backend","timestamp":"2025-12-26 16:04:14"}
+{"level":"info","message":"Chat message processed successfully for conversation: 94b3d67c-6a0b-4f92-a320-c80c716f8ade","service":"ai-agent-backend","timestamp":"2025-12-26 16:04:14"}
+{"level":"info","message":"Metrics WebSocket connected: GoSl55DnGlodf4cZAAAC for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 16:04:32"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to overall metrics","service":"ai-agent-backend","timestamp":"2025-12-26 16:04:32"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 16:04:51"}
+{"level":"info","message":"Metrics WebSocket connected: fg-1quzRnv80EVJsAAAF for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2025-12-26 16:09:37"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to overall metrics","service":"ai-agent-backend","timestamp":"2025-12-26 16:09:37"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a disconnected from metrics socket","service":"ai-agent-backend","timestamp":"2025-12-26 16:09:44"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:16:58"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:16:58"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:16:58"}
+{"level":"info","message":"Password reset email sent to ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 16:18:24"}
+{"level":"info","message":"Password reset requested for: ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 16:18:24"}
+{"level":"info","message":"Password reset successful for user: ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 16:19:45"}
+{"level":"info","message":"User signed in: ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 16:19:55"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:24:09"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:24:09"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:24:09"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:24:22"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:24:22"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:24:22"}
+{"level":"info","message":"Password changed successfully for user: ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 16:32:44"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:36:20"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:36:20"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:36:20"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:36:35"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:36:35"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:36:35"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:37:24"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:37:24"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:37:24"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:37:58"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:37:58"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:37:58"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:38:19"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:38:19"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:38:19"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:40:24"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:40:24"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:40:24"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:40:38"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:40:38"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:40:38"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 16:40:53"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 16:40:53"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 16:40:54"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 17:02:34"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 17:02:34"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 17:02:34"}
+{"level":"info","message":"Verification email sent to ahmadkanaan021@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 17:03:41"}
+{"level":"info","message":"New user registered and verification email sent: ahmadkanaan021@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 17:03:41"}
+{"level":"info","message":"Email verified successfully for user: ahmadkanaan021@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 17:05:18"}
+{"level":"info","message":"User signed in: ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 17:05:56"}

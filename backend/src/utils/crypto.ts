@@ -21,4 +21,12 @@ const hashResetToken = (token: string): string => {
   return crypto.createHash("sha256").update(token).digest("hex");
 };
 
-export { hashPassword, comparePassword, generateResetToken, hashResetToken };
+const generateOTP = (): string => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+const hashOTP = (otp: string): string => {
+  return crypto.createHash("sha256").update(otp).digest("hex");
+};
+
+export { hashPassword, comparePassword, generateResetToken, hashResetToken, generateOTP, hashOTP };

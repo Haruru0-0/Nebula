@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect, Suspense, useCallback, useMemo } from "react"
+import { useState, useRef, useEffect, Suspense, useMemo } from "react"
 import { useAppDispatch, useAppSelector } from "@/lib/store/store"
 import { fetchAgents, agentFetchSelector } from "@/lib/store/slices/agents/agentFetchSlice"
 import { fetchAgentById, agentDetailSelector, setCurrentAgent } from "@/lib/store/slices/agents/agentDetailSlice"
@@ -11,16 +11,25 @@ import { fetchConversations, conversationFetchSelector } from "@/lib/store/slice
 import { fetchConversationById, conversationDetailSelector, setActiveConversation } from "@/lib/store/slices/chat/conversationDetailSlice"
 import { sendMessage as sendMessageAction, messageSendSelector, clearMessageSendState } from "@/lib/store/slices/chat/messageSendSlice"
 import { deleteConversation, conversationDeleteSelector, clearConversationDeleteState } from "@/lib/store/slices/chat/conversationDeleteSlice"
+import { updateConversation, conversationUpdateSelector, clearConversationUpdateState } from "@/lib/store/slices/chat/conversationUpdateSlice"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useIsMobile } from "@/components/ui/use-mobile"
 import {
   Send,
   ImageIcon,
@@ -31,9 +40,13 @@ import {
   Paperclip,
   Wand2,
   Loader2,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { AgentEditDialog } from "@/components/agent-edit-dialog"
+import { ConversationDeleteDialog } from "@/components/conversation-delete-dialog"
 import { toast } from "sonner"
 import type { Agent } from "@/types"
 
@@ -47,17 +60,28 @@ function ChatPageContent() {
   const { conversations, isFetching: isFetchingConvs } = useAppSelector(conversationFetchSelector)
   const { activeConversation, isFetching: isFetchingDetail } = useAppSelector(conversationDetailSelector)
   const { isSending, isSuccess: isSendSuccess, isError: isSendError, errorMessage: sendError } = useAppSelector(messageSendSelector)
-  const { isSuccess: isDeleteSuccess } = useAppSelector(conversationDeleteSelector)
+  const { isDeleting, isSuccess: isDeleteSuccess } = useAppSelector(conversationDeleteSelector)
+  const { isUpdating: isRenaming, isSuccess: isRenameSuccess } = useAppSelector(conversationUpdateSelector)
   const { isSuccess: isAgentAddSuccess } = useAppSelector(agentAddSelector)
   const { isSuccess: isAgentUpdateSuccess } = useAppSelector(agentUpdateSelector)
 
   const [selectedAgentId, setLocalSelectedAgentId] = useState<string | null>(null)
   const [input, setInput] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const [showAgentDialog, setShowAgentDialog] = useState(false)
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null)
+
+  // Delete confirmation state
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [conversationToDelete, setConversationToDelete] = useState<string | null>(null)
+  const [conversationTitleToDelete, setConversationTitleToDelete] = useState<string>("")
+
+  // Rename state
+  const [editingConversationId, setEditingConversationId] = useState<string | null>(null)
+  const [editingTitle, setEditingTitle] = useState("")
 
   const messages = activeConversation?.messages || []
   const currentConversations = useMemo(() =>
@@ -70,12 +94,25 @@ function ChatPageContent() {
     dispatch(fetchAgents())
   }, [dispatch])
 
-  // Scroll to bottom on messages change
+  // Auto-select last agent when agents are loaded
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    if (agents.length > 0 && !selectedAgentId) {
+      const lastAgent = agents[agents.length - 1]
+      setLocalSelectedAgentId(lastAgent.id)
+      dispatch(fetchAgentById(lastAgent.id))
+      dispatch(fetchConversations(lastAgent.id))
     }
-  }, [messages, isSending])
+  }, [agents, selectedAgentId, dispatch])
+
+  // Scroll to bottom on messages change or conversation change
+  useEffect(() => {
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+    // Small delay to ensure DOM is updated
+    const timeoutId = setTimeout(scrollToBottom, 100)
+    return () => clearTimeout(timeoutId)
+  }, [messages, isSending, activeConversation])
 
   // Auto-select first conversation when agent changes
   useEffect(() => {
@@ -84,11 +121,12 @@ function ChatPageContent() {
     }
   }, [selectedAgentId, dispatch]) // Only fetch when agent ID changes
 
+  // Auto-select last conversation when conversations are loaded
   useEffect(() => {
     if (currentConversations.length > 0 && !activeConversation && !isFetchingDetail) {
       dispatch(fetchConversationById(currentConversations[currentConversations.length - 1].id))
     }
-  }, [])
+  }, [currentConversations, activeConversation, isFetchingDetail, dispatch])
 
   // Operation Handlers
   useEffect(() => {
@@ -109,8 +147,21 @@ function ChatPageContent() {
       if (selectedAgentId) dispatch(fetchConversations(selectedAgentId))
       dispatch(setActiveConversation(null))
       dispatch(clearConversationDeleteState())
+      setDeleteConfirmOpen(false)
+      setConversationToDelete(null)
+      setConversationTitleToDelete("")
     }
   }, [isDeleteSuccess, dispatch, selectedAgentId])
+
+  useEffect(() => {
+    if (isRenameSuccess) {
+      toast.success("Conversation renamed")
+      if (selectedAgentId) dispatch(fetchConversations(selectedAgentId))
+      dispatch(clearConversationUpdateState())
+      setEditingConversationId(null)
+      setEditingTitle("")
+    }
+  }, [isRenameSuccess, dispatch, selectedAgentId])
 
   useEffect(() => {
     if (isAgentAddSuccess) {
@@ -176,8 +227,32 @@ function ChatPageContent() {
     setEditingAgent(null)
   }
 
-  const handleDeleteConversation = (id: string) => {
-    dispatch(deleteConversation(id))
+  const handleDeleteConversation = (conv: { id: string; title: string }) => {
+    setConversationToDelete(conv.id)
+    setConversationTitleToDelete(conv.title)
+    setDeleteConfirmOpen(true)
+  }
+
+  const confirmDeleteConversation = () => {
+    if (conversationToDelete) {
+      dispatch(deleteConversation(conversationToDelete))
+    }
+  }
+
+  const handleStartRename = (conv: { id: string; title: string }) => {
+    setEditingConversationId(conv.id)
+    setEditingTitle(conv.title)
+  }
+
+  const handleSaveRename = () => {
+    if (editingConversationId && editingTitle.trim()) {
+      dispatch(updateConversation({ conversationId: editingConversationId, title: editingTitle.trim() }))
+    }
+  }
+
+  const handleCancelRename = () => {
+    setEditingConversationId(null)
+    setEditingTitle("")
   }
 
   const ConversationsSidebar = ({ mobile = false }: { mobile?: boolean }) => (
@@ -207,39 +282,106 @@ function ChatPageContent() {
                   <p className="text-xs text-gray-500 mt-1">Start chatting to create one</p>
                 </div>
               ) : (
-                currentConversations.map((conv) => (
-                  <button
-                    key={conv.id}
-                    onClick={() => dispatch(fetchConversationById(conv.id))}
-                    className={cn(
-                      "w-full text-left p-3 rounded-lg transition-all text-sm group relative",
-                      "hover:bg-white/5",
-                      activeConversation?.id === conv.id
-                        ? "bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-500/30"
-                        : "border border-transparent",
-                    )}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <span className="truncate flex-1 font-medium">
-                        {conv.messages?.[0]?.content.slice(0, 30) || "New conversation"}...
-                      </span>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-5 w-5 flex-shrink-0 opacity-0 group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeleteConversation(conv.id)
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3 text-red-400" />
-                      </Button>
+                currentConversations.map((conv) => {
+                  const isSelected = activeConversation?.id === conv.id
+                  const isEditing = editingConversationId === conv.id
+
+                  return (
+                    <div
+                      key={conv.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => !isEditing && dispatch(fetchConversationById(conv.id))}
+                      onKeyDown={(e) => {
+                        if (!isEditing && (e.key === 'Enter' || e.key === ' ')) {
+                          e.preventDefault()
+                          dispatch(fetchConversationById(conv.id))
+                        }
+                      }}
+                      className={cn(
+                        "w-full text-left p-3 rounded-lg transition-all text-sm group relative cursor-pointer",
+                        isSelected
+                          ? "bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-500/30"
+                          : "border border-transparent hover:bg-white/5",
+                      )}
+                    >
+                      {isEditing ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            className="h-7 text-sm bg-white/10 border-white/20"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              e.stopPropagation()
+                              if (e.key === 'Enter') handleSaveRename()
+                              if (e.key === 'Escape') handleCancelRename()
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6 flex-shrink-0"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSaveRename()
+                            }}
+                            disabled={isRenaming}
+                          >
+                            {isRenaming ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 text-green-400" />}
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6 flex-shrink-0"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleCancelRename()
+                            }}
+                          >
+                            <X className="h-3 w-3 text-gray-400" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <span className="truncate flex-1 font-medium">
+                              {conv.title || conv.messages?.[0]?.content.slice(0, 30) || "New conversation"}
+                            </span>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-5 w-5 flex-shrink-0"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleStartRename({ id: conv.id, title: conv.title || conv.messages?.[0]?.content.slice(0, 30) || "New conversation" })
+                                }}
+                              >
+                                <Pencil className="h-3 w-3 text-gray-400" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-5 w-5 flex-shrink-0"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteConversation({ id: conv.id, title: conv.title || conv.messages?.[0]?.content.slice(0, 30) || "New conversation" })
+                                }}
+                              >
+                                <Trash2 className="h-3 w-3 text-red-400" />
+                              </Button>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-400">
+                            {conv.messages?.length || 0} messages • {new Date(conv.updatedAt).toLocaleDateString()}
+                          </p>
+                        </>
+                      )}
                     </div>
-                    <p className="text-xs text-gray-400">
-                      {conv.messages?.length || 0} messages • {new Date(conv.updatedAt).toLocaleDateString()}
-                    </p>
-                  </button>
-                ))
+                  )
+                })
               )}
             </div>
           </ScrollArea>
@@ -268,7 +410,7 @@ function ChatPageContent() {
                       <MessageSquare className="h-5 w-5" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-[300px] bg-black/95 border-white/10 p-6 pt-12">
+                  <SheetContent side="left" className="w-[300px] bg-black/95 border-white/10 p-6 pt-12" title="Conversations" description="Chat conversations sidebar">
                     <ConversationsSidebar mobile />
                   </SheetContent>
                 </Sheet>
@@ -292,7 +434,7 @@ function ChatPageContent() {
 
 
           {/* Messages */}
-          <ScrollArea className="flex-1 min-h-0 px-4 pb-2" ref={scrollRef}>
+          <ScrollArea className="flex-1 min-h-0 px-4 py-2" ref={scrollRef}>
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-teal-400/20 to-emerald-500/20 mb-4">
@@ -342,6 +484,7 @@ function ChatPageContent() {
                     </div>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
             )}
           </ScrollArea>
@@ -447,6 +590,14 @@ function ChatPageContent() {
         onOpenChange={setShowAgentDialog}
         agent={editingAgent}
         onSave={handleSaveAgent}
+      />
+
+      <ConversationDeleteDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        conversationTitle={conversationTitleToDelete}
+        onConfirm={confirmDeleteConversation}
+        isLoading={isDeleting}
       />
     </div>
   )

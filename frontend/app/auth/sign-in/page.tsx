@@ -60,9 +60,24 @@ export default function SignInPage() {
 
   useEffect(() => {
     if (isError && errorMessage) {
-      toast.error(errorMessage)
+      if (errorMessage.includes('verify your email') || errorMessage.includes('Email verification') || errorMessage.includes('verify')) {
+        toast.error(
+          <div>
+            <div>{errorMessage}</div>
+            <Link
+              href={`/auth/verify-email?email=${encodeURIComponent(form.getValues("email"))}`}
+              className="text-teal-400 hover:text-teal-300 underline"
+            >
+              Resend verification email
+            </Link>
+          </div>,
+          { duration: 6000 }
+        )
+      } else {
+        toast.error(errorMessage)
+      }
     }
-  }, [isError, errorMessage])
+  }, [isError, errorMessage, form])
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     dispatch(loginUser(values))

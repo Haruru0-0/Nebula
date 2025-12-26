@@ -66,10 +66,11 @@ export default function SignUpPage() {
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success("Account created successfully!")
-      router.push("/app/chat")
+      toast.success("Account created successfully! Please check your email to verify your account.")
+      const email = form.getValues("email")
+      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`)
     }
-  }, [isSuccess, router])
+  }, [isSuccess, router, form])
 
   useEffect(() => {
     if (isError && errorMessage) {

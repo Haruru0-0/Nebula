@@ -20,7 +20,7 @@ export function AppTopbar({ title }: AppTopbarProps) {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-64 bg-black/95 border-white/10">
+          <SheetContent side="left" className="p-0 w-64 bg-black/95 border-white/10" title="Navigation Menu" description="Mobile navigation menu">
             <AppSidebar />
           </SheetContent>
         </Sheet>

@@ -109,3 +109,12 @@ export type ResetPasswordPayload = {
   token: string
   password: string
 }
+
+export type VerifyEmailPayload = {
+  token: string
+  email: string
+}
+
+export type ResendVerificationPayload = {
+  email: string
+}

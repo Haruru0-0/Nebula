@@ -23,6 +23,8 @@ export const users = pgTable(
         password: text("password").notNull(),
         name: varchar("name", { length: 255 }),
         isVerified: boolean("is_verified").notNull().default(false),
+        verificationToken: varchar("verification_token", { length: 255 }),
+        verificationTokenExpiry: timestamp("verification_token_expiry", { withTimezone: true }),
         resetToken: varchar("reset_token", { length: 255 }),
         resetTokenExpiry: timestamp("reset_token_expiry", { withTimezone: true }),
         createdAt: timestamp("created_at", { withTimezone: true })

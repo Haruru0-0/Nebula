@@ -21,7 +21,6 @@ import {
 import {
   MessageSquare,
   BarChart3,
-  Settings,
   Sparkles,
   User as UserIcon,
   LogOut,
@@ -45,11 +44,6 @@ const routes = [
     label: "Analytics",
     icon: BarChart3,
     href: "/app/analytics",
-  },
-  {
-    label: "Settings",
-    icon: Settings,
-    href: "/app/settings",
   },
 ]
 
@@ -161,13 +155,9 @@ export function AppSidebar() {
           <DropdownMenuContent align="end" className="w-56 bg-black/95 border-white/10">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/app/profile')}>
               <UserCircle className="h-4 w-4 mr-2" />
               Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-white/10" />
             <DropdownMenuItem className="cursor-pointer text-red-400 focus:text-red-300" onClick={handleLogout}>

@@ -40,6 +40,9 @@ export const setupMetricsSocket = (io: Server): void => {
   metricsNamespace.on('connection', (socket: SocketWithData) => {
     logger.info(`Metrics WebSocket connected: ${socket.id} for user ${socket.data.userId}`);
 
+    // Store intervals to clean up on disconnect
+    const intervals = new Map<string, NodeJS.Timeout>();
+
     socket.on('subscribe:agent', async (agentId: string) => {
       try {
         const agent = await db.query.agents.findFirst({
@@ -89,14 +92,11 @@ export const setupMetricsSocket = (io: Server): void => {
               });
             }
           } catch (error) {
-            logger.error('Error fetching metrics:', error);
+            logger.error('Error fetching agent metrics:', error);
           }
         }, 5000);
 
-        socket.on('disconnect', () => {
-          clearInterval(interval);
-          logger.info(`User ${socket.data.userId} disconnected from metrics socket`);
-        });
+        intervals.set(`agent:${agentId}`, interval);
       } catch (error) {
         logger.error('Error subscribing to agent metrics:', error);
         socket.emit('error', { message: 'Failed to subscribe to metrics' });
@@ -105,7 +105,74 @@ export const setupMetricsSocket = (io: Server): void => {
 
     socket.on('unsubscribe:agent', (agentId: string) => {
       socket.leave(`agent:${agentId}`);
+      const interval = intervals.get(`agent:${agentId}`);
+      if (interval) {
+        clearInterval(interval);
+        intervals.delete(`agent:${agentId}`);
+      }
       logger.info(`User ${socket.data.userId} unsubscribed from agent ${agentId}`);
+    });
+
+    socket.on('subscribe:overall', async () => {
+      try {
+        socket.join(`user:${socket.data.userId}:overall`);
+        logger.info(`User ${socket.data.userId} subscribed to overall metrics`);
+
+        const interval = setInterval(async () => {
+          try {
+            const conversationsList = await db.query.conversations.findMany({
+              where: eq(conversations.userId, socket.data.userId),
+              columns: { id: true },
+            });
+
+            const conversationIds = conversationsList.map((c) => c.id);
+
+            let recentMetrics: any[] = [];
+            if (conversationIds.length > 0) {
+              recentMetrics = await db.query.metrics.findMany({
+                where: and(
+                  inArray(metrics.conversationId, conversationIds),
+                  gte(metrics.timestamp, new Date(Date.now() - 60000))
+                ),
+                orderBy: [desc(metrics.timestamp)],
+                limit: 10,
+              });
+            }
+
+            if (recentMetrics.length > 0) {
+              socket.emit('metrics:update', {
+                agentId: null,
+                metrics: recentMetrics,
+                timestamp: new Date(),
+              });
+            }
+          } catch (error) {
+            logger.error('Error fetching overall metrics:', error);
+          }
+        }, 5000);
+
+        intervals.set('overall', interval);
+      } catch (error) {
+        logger.error('Error subscribing to overall metrics:', error);
+        socket.emit('error', { message: 'Failed to subscribe to overall metrics' });
+      }
+    });
+
+    socket.on('unsubscribe:overall', () => {
+      socket.leave(`user:${socket.data.userId}:overall`);
+      const interval = intervals.get('overall');
+      if (interval) {
+        clearInterval(interval);
+        intervals.delete('overall');
+      }
+      logger.info(`User ${socket.data.userId} unsubscribed from overall metrics`);
+    });
+
+    socket.on('disconnect', () => {
+      // Clear all intervals on disconnect
+      intervals.forEach((interval) => clearInterval(interval));
+      intervals.clear();
+      logger.info(`User ${socket.data.userId} disconnected from metrics socket`);
     });
   });
 };

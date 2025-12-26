@@ -5,11 +5,14 @@ import { io, Socket } from "socket.io-client"
 import secureLocalStorage from "react-secure-storage"
 import api from "@/lib/store/api"
 import { SERVER_ADDR } from "@/lib/store/constant"
-import type { Metrics, ApiResponse, MetricsResponse } from "@/types"
+import { useAppDispatch, useAppSelector } from "@/lib/store/store"
+import { fetchAgents, agentFetchSelector } from "@/lib/store/slices/agents/agentFetchSlice"
+import type { Metrics, ApiResponse, MetricsResponse, Agent } from "@/types"
 import { MetricCard } from "@/components/metric-card"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
-import { Activity, Zap, MessageSquare, AlertCircle, Pause, Play } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Activity, Zap, MessageSquare, AlertCircle, Pause, Play, Sparkles } from "lucide-react"
 import {
   LineChart,
   Line,
@@ -35,17 +38,30 @@ const INITIAL_METRICS: Metrics = {
 }
 
 export default function AnalyticsPage() {
+  const dispatch = useAppDispatch()
+  const { agents } = useAppSelector(agentFetchSelector)
+
   const [timeRange, setTimeRange] = useState<"1h" | "24h" | "7d" | "30d">("24h")
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null)
   const [metrics, setMetrics] = useState<Metrics>(INITIAL_METRICS)
   const [isPaused, setIsPaused] = useState(false)
   const socketRef = useRef<Socket | null>(null)
+  const previousAgentIdRef = useRef<string | null>(null)
 
   // Adjust max points based on range to keep charts readable but detailed enough
   const maxDataPoints = timeRange === "1h" ? 60 : timeRange === "24h" ? 100 : 200
 
+  // Fetch agents on mount
+  useEffect(() => {
+    dispatch(fetchAgents())
+  }, [dispatch])
+
   const fetchInitialMetrics = useCallback(async () => {
     try {
-      const response = await api.get<ApiResponse<MetricsResponse>>(`/metrics/overall?period=${timeRange}`)
+      const endpoint = selectedAgentId
+        ? `/metrics/${selectedAgentId}?period=${timeRange}`
+        : `/metrics/overall?period=${timeRange}`
+      const response = await api.get<ApiResponse<MetricsResponse>>(endpoint)
       const { summary, metrics: history } = response.data.data
 
       setMetrics({
@@ -60,7 +76,7 @@ export default function AnalyticsPage() {
     } catch (error) {
       console.error("Failed to fetch initial metrics:", error)
     }
-  }, [timeRange, maxDataPoints])
+  }, [timeRange, maxDataPoints, selectedAgentId])
 
   useEffect(() => {
     fetchInitialMetrics()
@@ -87,6 +103,23 @@ export default function AnalyticsPage() {
     })
 
     socketRef.current = socket
+
+    // Unsubscribe from previous subscription if agent changed
+    if (previousAgentIdRef.current !== selectedAgentId) {
+      if (previousAgentIdRef.current) {
+        socket.emit('unsubscribe:agent', previousAgentIdRef.current)
+      } else {
+        socket.emit('unsubscribe:overall')
+      }
+    }
+
+    // Subscribe to new subscription
+    if (selectedAgentId) {
+      socket.emit('subscribe:agent', selectedAgentId)
+    } else {
+      socket.emit('subscribe:overall')
+    }
+    previousAgentIdRef.current = selectedAgentId
 
     socket.on("metrics:update", (data: { metrics: any[], timestamp: string }) => {
       setMetrics((prev) => {
@@ -116,7 +149,7 @@ export default function AnalyticsPage() {
     return () => {
       socket.disconnect()
     }
-  }, [isPaused, maxDataPoints])
+  }, [isPaused, maxDataPoints, selectedAgentId])
 
   const togglePause = useCallback(() => {
     setIsPaused((prev) => !prev)
@@ -131,20 +164,46 @@ export default function AnalyticsPage() {
   return (
     <div className="p-6 space-y-6">
       {/* Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
-          {(["1h", "24h", "7d", "30d"] as const).map((range) => (
-            <Button
-              key={range}
-              variant={timeRange === range ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTimeRange(range)}
-              className={timeRange === range ? "bg-teal-500 hover:bg-teal-400" : ""}
-            >
-              {range}
-            </Button>
-          ))}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex gap-2">
+            {(["1h", "24h", "7d", "30d"] as const).map((range) => (
+              <Button
+                key={range}
+                variant={timeRange === range ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTimeRange(range)}
+                className={timeRange === range ? "bg-teal-500 hover:bg-teal-400" : ""}
+              >
+                {range}
+              </Button>
+            ))}
+          </div>
+
+          {/* Agent Selector */}
+          <Select
+            value={selectedAgentId || "all"}
+            onValueChange={(value) => setSelectedAgentId(value === "all" ? null : value)}
+          >
+            <SelectTrigger className="w-[200px] border-white/10 bg-white/5">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-teal-400" />
+                <SelectValue placeholder="All Agents" />
+              </div>
+            </SelectTrigger>
+            <SelectContent className="bg-black/95 border-white/10">
+              <SelectItem value="all" className="focus:bg-white/10">
+                <span className="font-medium">All Agents</span>
+              </SelectItem>
+              {agents.map((agent: Agent) => (
+                <SelectItem key={agent.id} value={agent.id} className="focus:bg-white/10">
+                  {agent.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+
         <Button variant="outline" size="sm" onClick={togglePause} className="gap-2 bg-transparent">
           {isPaused ? (
             <>

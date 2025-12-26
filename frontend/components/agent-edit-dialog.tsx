@@ -84,15 +84,16 @@ function AgentEditForm({
   useEffect(() => {
     const availableModels = modelsByProvider[formData.provider as keyof typeof modelsByProvider]
     if (availableModels && availableModels.length > 0) {
-      const firstModel = availableModels[0].id
-      if (formData.model !== firstModel) {
+      const currentModel = availableModels.find(model => model.id === formData.model)
+      if (!currentModel) {
+        // If current model is not available for this provider, use the first model
         setFormData((prev) => ({
           ...prev,
-          model: firstModel,
+          model: availableModels[0].id,
         }))
       }
     }
-  }, [formData.provider])
+  }, [formData.provider, formData.model])
 
   const handleProviderChange = (provider: "openai" | "gemini") => {
     setFormData({
@@ -133,7 +134,7 @@ function AgentEditForm({
             onValueChange={(value: "openai" | "gemini") => handleProviderChange(value)}
           >
             <SelectTrigger id="provider" className="bg-white/5 border-white/10 h-11">
-              <SelectValue />
+              <SelectValue placeholder="Select a provider" />
             </SelectTrigger>
             <SelectContent className="bg-black/95 border-white/10">
               <SelectItem value="openai">OpenAI</SelectItem>
@@ -169,7 +170,7 @@ function AgentEditForm({
             onValueChange={(value) => setFormData({ ...formData, model: value })}
           >
             <SelectTrigger id="model" className="bg-white/5 border-white/10 h-11">
-              <SelectValue />
+              <SelectValue placeholder="Select a model" />
             </SelectTrigger>
             <SelectContent className="bg-black/95 border-white/10 border-teal-500/20">
               {(modelsByProvider[formData.provider as keyof typeof modelsByProvider] || modelsByProvider.openai).map(

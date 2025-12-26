@@ -297,3 +297,52 @@ export const deleteConversation = async (
     next(error);
   }
 };
+
+export const updateConversation = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { conversationId } = req.params;
+    const { title } = req.body;
+
+    if (!title || typeof title !== 'string' || title.trim().length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'Title is required and must be a non-empty string',
+      });
+      return;
+    }
+
+    const conversation = await db.query.conversations.findFirst({
+      where: and(
+        eq(conversations.id, conversationId),
+        eq(conversations.userId, req.user!.id)
+      ),
+    });
+
+    if (!conversation) {
+      res.status(404).json({
+        success: false,
+        message: "Conversation not found",
+      });
+      return;
+    }
+
+    const [updatedConversation] = await db.update(conversations)
+      .set({ title: title.trim(), updatedAt: new Date() })
+      .where(eq(conversations.id, conversationId))
+      .returning();
+
+    logger.info(`Conversation renamed: ${conversationId} to "${title}"`);
+
+    res.status(200).json({
+      success: true,
+      message: "Conversation updated successfully",
+      data: { conversation: updatedConversation },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

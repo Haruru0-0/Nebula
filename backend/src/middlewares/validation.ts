@@ -47,6 +47,20 @@ export const schemas = {
     password: Joi.string().min(8).required(),
   }),
 
+  changePassword: Joi.object({
+    oldPassword: Joi.string().required(),
+    newPassword: Joi.string().min(8).required(),
+  }),
+
+  verifyEmail: Joi.object({
+    token: Joi.string().length(6).required(),
+    email: Joi.string().email().required(),
+  }),
+
+  resendVerification: Joi.object({
+    email: Joi.string().email().required(),
+  }),
+
   createAgent: Joi.object({
     name: Joi.string().min(2).max(100).required(),
     systemPrompt: Joi.string().min(10).max(5000).required(),
