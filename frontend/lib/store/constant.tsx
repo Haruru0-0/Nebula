@@ -1,1 +1,1 @@
-export const SERVER_ADDR = "http://localhost:4000/api";
+export const SERVER_ADDR = "https://nebula-g9er.onrender.com/api";
