@@ -219,3 +219,17 @@
 {"level":"info","message":"Email verified successfully for user: ahmadkanaan021@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 17:05:18"}
 {"level":"info","message":"User signed in: ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 17:05:56"}
 {"level":"info","message":"User signed in: ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2025-12-26 17:24:03"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2025-12-26 19:06:37"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2025-12-26 19:06:37"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2025-12-26 19:06:37"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2026-01-02 10:42:24"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2026-01-02 10:42:24"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2026-01-02 10:42:24"}
+{"level":"info","message":"User signed in: ahmadkanaan014@gmail.com","service":"ai-agent-backend","timestamp":"2026-01-02 11:02:50"}
+{"level":"info","message":"Agent created: a805f250-a105-4fa3-bf38-a54c97d4d6e8 by user ahmadkanaan014@gmail.com (Provider: gemini)","service":"ai-agent-backend","timestamp":"2026-01-02 11:04:51"}
+{"level":"info","message":"New conversation created: 15407118-54fa-4121-8006-68d53baaf8aa for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2026-01-02 11:05:30"}
+{"level":"info","message":"Gemini Response - Model: gemini-2.5-flash, Tokens: 109, Latency: 2962ms","service":"ai-agent-backend","timestamp":"2026-01-02 11:05:33"}
+{"level":"info","message":"Chat message processed successfully for conversation: 15407118-54fa-4121-8006-68d53baaf8aa","service":"ai-agent-backend","timestamp":"2026-01-02 11:05:33"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2026-01-02 11:14:53"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2026-01-02 11:14:53"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2026-01-02 11:14:53"}
