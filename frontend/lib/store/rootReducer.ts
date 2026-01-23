@@ -16,6 +16,7 @@ import { ConversationDeleteSlice } from "./slices/chat/conversationDeleteSlice";
 import { ConversationDetailSlice } from "./slices/chat/conversationDetailSlice";
 import { ConversationUpdateSlice } from "./slices/chat/conversationUpdateSlice";
 import { MessageSendSlice } from "./slices/chat/messageSendSlice";
+import { streamingChatSlice } from "./slices/chat/streamingChatSlice";
 
 import { OverallMetricsSlice } from "./slices/metrics/overallMetricsSlice";
 import { AgentMetricsSlice } from "./slices/metrics/agentMetricsSlice";
@@ -42,6 +43,7 @@ export const reducer = {
     conversationDetail: ConversationDetailSlice.reducer,
     conversationUpdate: ConversationUpdateSlice.reducer,
     messageSend: MessageSendSlice.reducer,
+    streamingChat: streamingChatSlice.reducer,
 
     // Metrics
     overallMetrics: OverallMetricsSlice.reducer,

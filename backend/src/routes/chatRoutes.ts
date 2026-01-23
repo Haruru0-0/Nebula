@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(authenticate);
 
 router.post('/:agentId', validate(schemas.sendMessage), chatController.chat);
+router.post('/:agentId/stream', validate(schemas.sendMessage), chatController.streamChat);
 router.get('/:agentId/conversations', chatController.getConversations);
 router.get('/conversations/:conversationId/get', chatController.getConversationById);
 router.patch('/conversations/:conversationId', chatController.updateConversation);

@@ -233,3 +233,23 @@
 {"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2026-01-02 11:14:53"}
 {"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2026-01-02 11:14:53"}
 {"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2026-01-02 11:14:53"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2026-01-23 19:54:24"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2026-01-23 19:54:24"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2026-01-23 19:54:24"}
+{"level":"info","message":"Gemini Response - Model: gemini-2.5-flash, Tokens: 140, Latency: 1973ms","service":"ai-agent-backend","timestamp":"2026-01-23 19:54:52"}
+{"level":"info","message":"Chat message processed successfully for conversation: 94b3d67c-6a0b-4f92-a320-c80c716f8ade","service":"ai-agent-backend","timestamp":"2026-01-23 19:54:52"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2026-01-23 19:55:18"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2026-01-23 19:55:18"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2026-01-23 19:55:18"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2026-01-23 20:11:58"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2026-01-23 20:11:58"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2026-01-23 20:11:58"}
+{"level":"info","message":"🚀 Server running on port 4000","service":"ai-agent-backend","timestamp":"2026-01-23 20:12:11"}
+{"level":"info","message":"📊 Environment: development","service":"ai-agent-backend","timestamp":"2026-01-23 20:12:11"}
+{"level":"info","message":"🔗 Health check: http://localhost:4000/health","service":"ai-agent-backend","timestamp":"2026-01-23 20:12:11"}
+{"level":"info","message":"Streaming chat completed for conversation: 94b3d67c-6a0b-4f92-a320-c80c716f8ade, tokens: 1179, latency: 10965ms","service":"ai-agent-backend","timestamp":"2026-01-23 20:25:00"}
+{"level":"info","message":"Streaming chat completed for conversation: 94b3d67c-6a0b-4f92-a320-c80c716f8ade, tokens: 2311, latency: 7267ms","service":"ai-agent-backend","timestamp":"2026-01-23 20:29:43"}
+{"level":"info","message":"New conversation created: 53da4cab-d244-4046-a076-147227b0f55c for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2026-01-23 20:30:06"}
+{"level":"info","message":"Streaming chat completed for conversation: 53da4cab-d244-4046-a076-147227b0f55c, tokens: 69, latency: 1634ms","service":"ai-agent-backend","timestamp":"2026-01-23 20:30:08"}
+{"level":"info","message":"Metrics WebSocket connected: 7khpqeevg_5mHXHHAAAC for user 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a","service":"ai-agent-backend","timestamp":"2026-01-23 20:31:06"}
+{"level":"info","message":"User 10c0a1b5-acf3-4dc1-83fb-79165ff97b7a subscribed to overall metrics","service":"ai-agent-backend","timestamp":"2026-01-23 20:31:06"}

@@ -8,10 +8,13 @@ import { fetchAgentById, agentDetailSelector, setCurrentAgent } from "@/lib/stor
 import { createAgent as createAgentAction, agentAddSelector, clearAgentAddState } from "@/lib/store/slices/agents/agentAddSlice"
 import { updateAgent as updateAgentAction, agentUpdateSelector, clearAgentUpdateState } from "@/lib/store/slices/agents/agentUpdateSlice"
 import { fetchConversations, conversationFetchSelector } from "@/lib/store/slices/chat/conversationFetchSlice"
-import { fetchConversationById, conversationDetailSelector, setActiveConversation } from "@/lib/store/slices/chat/conversationDetailSlice"
+import { fetchConversationById, conversationDetailSelector, setActiveConversation, addMessage } from "@/lib/store/slices/chat/conversationDetailSlice"
 import { sendMessage as sendMessageAction, messageSendSelector, clearMessageSendState } from "@/lib/store/slices/chat/messageSendSlice"
 import { deleteConversation, conversationDeleteSelector, clearConversationDeleteState } from "@/lib/store/slices/chat/conversationDeleteSlice"
 import { updateConversation, conversationUpdateSelector, clearConversationUpdateState } from "@/lib/store/slices/chat/conversationUpdateSlice"
+import { streamingChatSelector, startStreaming, appendToken, setConversationId, finishStreaming, setStreamingError, resetStreaming } from "@/lib/store/slices/chat/streamingChatSlice"
+import { SERVER_ADDR } from "@/lib/store/constant"
+import secureLocalStorage from "react-secure-storage"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -64,12 +67,14 @@ function ChatPageContent() {
   const { isUpdating: isRenaming, isSuccess: isRenameSuccess } = useAppSelector(conversationUpdateSelector)
   const { isSuccess: isAgentAddSuccess } = useAppSelector(agentAddSelector)
   const { isSuccess: isAgentUpdateSuccess } = useAppSelector(agentUpdateSelector)
+  const { isStreaming, streamingContent, streamingConversationId } = useAppSelector(streamingChatSelector)
 
   const [selectedAgentId, setLocalSelectedAgentId] = useState<string | null>(null)
   const [input, setInput] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const hasSelectedInitial = useRef(false)
 
   const [showAgentDialog, setShowAgentDialog] = useState(false)
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null)
@@ -104,7 +109,7 @@ function ChatPageContent() {
     }
   }, [agents, selectedAgentId, dispatch])
 
-  // Scroll to bottom on messages change or conversation change
+  // Scroll to bottom on messages change or streaming content change
   useEffect(() => {
     const scrollToBottom = () => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -112,7 +117,7 @@ function ChatPageContent() {
     // Small delay to ensure DOM is updated
     const timeoutId = setTimeout(scrollToBottom, 100)
     return () => clearTimeout(timeoutId)
-  }, [messages, isSending, activeConversation])
+  }, [messages, isStreaming, streamingContent, activeConversation])
 
   // Auto-select first conversation when agent changes
   useEffect(() => {
@@ -121,10 +126,20 @@ function ChatPageContent() {
     }
   }, [selectedAgentId, dispatch]) // Only fetch when agent ID changes
 
-  // Auto-select last conversation when conversations are loaded
+  // Auto-select last conversation when conversations are loaded, but only once per agent selection
   useEffect(() => {
-    if (currentConversations.length > 0 && !activeConversation && !isFetchingDetail) {
+    if (selectedAgentId) {
+      // Reset selection flag when agent changes
+      hasSelectedInitial.current = false
+    }
+  }, [selectedAgentId])
+
+  useEffect(() => {
+    if (currentConversations.length > 0 && !activeConversation && !isFetchingDetail && !hasSelectedInitial.current) {
+      // Only auto-select if we haven't manually selected or created a new one yet
+      // and only if we are in an "initial load" state (not just clicked 'new chat')
       dispatch(fetchConversationById(currentConversations[currentConversations.length - 1].id))
+      hasSelectedInitial.current = true
     }
   }, [currentConversations, activeConversation, isFetchingDetail, dispatch])
 
@@ -196,14 +211,85 @@ function ChatPageContent() {
     }
   }
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim() || !selectedAgentId) return
-    dispatch(sendMessageAction({
-      agentId: selectedAgentId,
-      message: input,
-      conversationId: activeConversation?.id
-    }))
+
+    const messageToSend = input
     setInput("")
+
+    // Optimistic update: show user message immediately
+    const tempUserMessage = {
+      id: `temp-${Date.now()}`,
+      role: "user",
+      content: messageToSend,
+      createdAt: new Date().toISOString(),
+      conversationId: activeConversation?.id || ""
+    }
+    dispatch(addMessage(tempUserMessage))
+
+    // Start streaming state
+    dispatch(startStreaming(activeConversation?.id || null))
+
+    try {
+      const token = secureLocalStorage.getItem("accessToken")
+      const response = await fetch(`${SERVER_ADDR}/chat/${selectedAgentId}/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          message: messageToSend,
+          conversationId: activeConversation?.id
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to start streaming')
+      }
+
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+
+      if (!reader) {
+        throw new Error('No response body')
+      }
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6))
+
+              if (data.type === 'start') {
+                dispatch(setConversationId(data.conversationId))
+              } else if (data.type === 'token') {
+                dispatch(appendToken(data.content))
+              } else if (data.type === 'done') {
+                dispatch(finishStreaming(data.message))
+                // Refresh conversation list and detail
+                if (selectedAgentId) dispatch(fetchConversations(selectedAgentId))
+                dispatch(fetchConversationById(data.conversationId))
+              } else if (data.type === 'error') {
+                dispatch(setStreamingError(data.message))
+                toast.error(data.message)
+              }
+            } catch (e) {
+              // Ignore JSON parse errors for incomplete chunks
+            }
+          }
+        }
+      }
+    } catch (error) {
+      dispatch(setStreamingError(error instanceof Error ? error.message : 'Streaming failed'))
+      toast.error('Failed to send message')
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -470,17 +556,24 @@ function ChatPageContent() {
                     </div>
                   </div>
                 ))}
-                {isSending && (
+                {isStreaming && (
                   <div className="flex gap-3 justify-start">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400/20 to-emerald-500/20">
                       <Sparkles className="h-4 w-4 text-teal-400" />
                     </div>
-                    <div className="rounded-2xl px-4 py-3 bg-white/5 border border-white/10">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                        <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:0.4s]" />
-                      </div>
+                    <div className="rounded-2xl px-4 py-3 bg-white/5 border border-white/10 max-w-[85%] sm:max-w-[80%]">
+                      {streamingContent ? (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                          {streamingContent}
+                          <span className="inline-block w-1.5 h-4 bg-teal-400 ml-0.5 animate-pulse" />
+                        </p>
+                      ) : (
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" />
+                          <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                          <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -497,7 +590,7 @@ function ChatPageContent() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={selectedAgent ? "Ask a follow-up..." : "Select an agent first..."}
-                disabled={!selectedAgent || isSending}
+                disabled={!selectedAgent || isStreaming}
                 className="bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[60px] max-h-[200px] px-4 pt-4 pb-2"
                 rows={1}
               />
@@ -572,11 +665,11 @@ function ChatPageContent() {
 
                 <Button
                   onClick={handleSend}
-                  disabled={!input.trim() || !selectedAgent || isSending}
+                  disabled={!input.trim() || !selectedAgent || isStreaming}
                   size="icon"
                   className="h-8 w-8 rounded-lg bg-teal-500 hover:bg-teal-400 disabled:opacity-30"
                 >
-                  {isSending ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Send className="h-4 w-4" />}
+                  {isStreaming ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Send className="h-4 w-4" />}
                 </Button>
               </div>
             </div>

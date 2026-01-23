@@ -41,6 +41,14 @@ export const ConversationDetailSlice = createSlice({
             state.isFetching = false;
             state.errorMessage = "";
             return state;
+        },
+        addMessage: (state, action) => {
+            if (state.activeConversation) {
+                if (!state.activeConversation.messages) {
+                    state.activeConversation.messages = [];
+                }
+                state.activeConversation.messages.push(action.payload);
+            }
         }
     },
     extraReducers: (builder) => {
@@ -60,5 +68,5 @@ export const ConversationDetailSlice = createSlice({
     }
 });
 
-export const { setActiveConversation, clearConversationDetailState } = ConversationDetailSlice.actions;
+export const { setActiveConversation, clearConversationDetailState, addMessage } = ConversationDetailSlice.actions;
 export const conversationDetailSelector = (state: { conversationDetail: ConversationDetailState }) => state.conversationDetail;

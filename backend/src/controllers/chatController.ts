@@ -3,7 +3,7 @@ import { agents, conversations, messages, metrics } from "../drizzle/schema";
 import { eq, and, asc, desc } from "drizzle-orm";
 import logger from "../utils/logger";
 import { Response, NextFunction } from "express";
-import { sendMessage } from "../services/llmService";
+import { sendMessage, streamMessage } from "../services/llmService";
 import { AuthRequest, SendMessageBody } from "../types";
 
 export const chat = async (
@@ -344,5 +344,212 @@ export const updateConversation = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+// SSE Streaming Chat Endpoint
+export const streamChat = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { message, conversationId } = req.body as SendMessageBody;
+    const { agentId } = req.params;
+
+    // Validate input
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'Message is required and must be a non-empty string',
+      });
+      return;
+    }
+
+    if (!agentId || typeof agentId !== 'string') {
+      res.status(400).json({
+        success: false,
+        message: 'Agent ID is required',
+      });
+      return;
+    }
+
+    // Verify agent exists and belongs to user
+    const agent = await db.query.agents.findFirst({
+      where: and(
+        eq(agents.id, agentId),
+        eq(agents.userId, req.user!.id)
+      ),
+    });
+
+    if (!agent) {
+      res.status(404).json({
+        success: false,
+        message: 'Agent not found or access denied',
+      });
+      return;
+    }
+
+    if (!agent.isActive) {
+      res.status(403).json({
+        success: false,
+        message: 'Agent is currently inactive',
+      });
+      return;
+    }
+
+    let conversation;
+
+    if (conversationId) {
+      conversation = await db.query.conversations.findFirst({
+        where: and(
+          eq(conversations.id, conversationId),
+          eq(conversations.userId, req.user!.id),
+          eq(conversations.agentId, agentId)
+        ),
+        with: {
+          messages: {
+            orderBy: [asc(messages.createdAt)],
+            limit: 20,
+          },
+        },
+      });
+
+      if (!conversation) {
+        res.status(404).json({
+          success: false,
+          message: 'Conversation not found or access denied',
+        });
+        return;
+      }
+    } else {
+      // Create new conversation
+      const conversationTitle = message.length > 50 ? message.substring(0, 50) : message;
+      const [newConversation] = await db.insert(conversations).values({
+        userId: req.user!.id,
+        agentId,
+        title: conversationTitle,
+      }).returning();
+
+      logger.info(`New conversation created: ${newConversation.id} for user ${req.user!.id}`);
+
+      conversation = {
+        ...newConversation,
+        messages: []
+      };
+    }
+
+    // Insert user message
+    await db.insert(messages).values({
+      conversationId: conversation.id,
+      role: "user",
+      content: message,
+    });
+
+    const conversationHistory = conversation.messages || [];
+
+    // Set SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+    res.flushHeaders();
+
+    // Send conversation ID immediately
+    res.write(`data: ${JSON.stringify({ type: 'start', conversationId: conversation.id })}\n\n`);
+
+    try {
+      const { stream, startTime, provider } = await streamMessage(agent, conversationHistory, message);
+
+      let fullContent = '';
+      let promptTokens = 0;
+      let completionTokens = 0;
+
+      // Stream tokens to client
+      if (provider === 'gemini') {
+        // Gemini streaming
+        for await (const chunk of stream as AsyncIterable<any>) {
+          const text = chunk.text || '';
+          if (text) {
+            fullContent += text;
+            res.write(`data: ${JSON.stringify({ type: 'token', content: text })}\n\n`);
+          }
+          // Try to get usage metadata if available
+          if (chunk.usageMetadata) {
+            promptTokens = chunk.usageMetadata.promptTokenCount || 0;
+            completionTokens = chunk.usageMetadata.candidatesTokenCount || 0;
+          }
+        }
+      } else {
+        // OpenAI streaming
+        for await (const chunk of stream as AsyncIterable<any>) {
+          const text = chunk.choices?.[0]?.delta?.content || '';
+          if (text) {
+            fullContent += text;
+            res.write(`data: ${JSON.stringify({ type: 'token', content: text })}\n\n`);
+          }
+          // Get usage from final chunk if available
+          if (chunk.usage) {
+            promptTokens = chunk.usage.prompt_tokens || 0;
+            completionTokens = chunk.usage.completion_tokens || 0;
+          }
+        }
+      }
+
+      const responseLatency = Date.now() - startTime;
+      const tokensProcessed = promptTokens + completionTokens;
+
+      // Save assistant message to database
+      const [assistantMessage] = await db.insert(messages).values({
+        conversationId: conversation.id,
+        role: "assistant",
+        content: fullContent,
+        tokenCount: tokensProcessed,
+      }).returning();
+
+      // Insert metrics
+      await db.insert(metrics).values({
+        conversationId: conversation.id,
+        tokensProcessed,
+        responseLatency,
+        messageCount: conversationHistory.length + 2,
+      });
+
+      // Update conversation timestamp
+      await db.update(conversations)
+        .set({ updatedAt: new Date() })
+        .where(eq(conversations.id, conversation.id));
+
+      logger.info(`Streaming chat completed for conversation: ${conversation.id}, tokens: ${tokensProcessed}, latency: ${responseLatency}ms`);
+
+      // Send completion event
+      res.write(`data: ${JSON.stringify({
+        type: 'done',
+        conversationId: conversation.id,
+        message: assistantMessage,
+        metrics: {
+          tokensProcessed,
+          responseLatency,
+        },
+      })}\n\n`);
+
+      res.end();
+    } catch (streamError) {
+      logger.error('Streaming error:', streamError);
+      res.write(`data: ${JSON.stringify({
+        type: 'error',
+        message: streamError instanceof Error ? streamError.message : 'Streaming failed'
+      })}\n\n`);
+      res.end();
+    }
+  } catch (error) {
+    logger.error('Stream chat endpoint error:', error);
+    // If headers not sent, use normal error handling
+    if (!res.headersSent) {
+      next(error);
+    } else {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: 'An error occurred' })}\n\n`);
+      res.end();
+    }
   }
 };
