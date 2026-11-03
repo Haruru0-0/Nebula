@@ -15,10 +15,10 @@ interface Row {
 }
 
 const START: Row[] = [
-  { name: "support-bot", model: "gpt-4o-mini", status: "ONLINE", latency: 1204, tokens: 48210 },
-  { name: "research-agent", model: "gemini-2.5-flash", status: "ONLINE", latency: 860, tokens: 129034 },
-  { name: "code-review", model: "gpt-4o", status: "IDLE", latency: 0, tokens: 8120 },
-  { name: "summarizer", model: "gemini-2.5-flash", status: "ONLINE", latency: 412, tokens: 20977 },
+  { name: "support-bot", model: "gpt-5-mini", status: "ONLINE", latency: 1204, tokens: 48210 },
+  { name: "research-agent", model: "gemini-3.0-flash", status: "ONLINE", latency: 860, tokens: 129034 },
+  { name: "code-review", model: "gpt-5", status: "IDLE", latency: 0, tokens: 8120 },
+  { name: "summarizer", model: "gemini-3.0-pro", status: "ONLINE", latency: 412, tokens: 20977 },
 ]
 
 const fmt = (n: number) => (n === 0 ? "-" : n.toLocaleString("en-US"))
