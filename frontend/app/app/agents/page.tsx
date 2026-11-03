@@ -9,7 +9,7 @@ import { updateAgent as updateAgentAction, agentUpdateSelector, clearAgentUpdate
 import { fetchAgentById, agentDetailSelector, setCurrentAgent } from "@/lib/store/slices/agents/agentDetailSlice"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { GlassCard } from "@/components/glass-card"
+import { Panel } from "@/components/panel"
 import { Badge } from "@/components/ui/badge"
 import { Search, Plus, Edit2, Copy, Trash2, Star, Loader2 } from "lucide-react"
 import { toast } from "sonner"
@@ -151,10 +151,10 @@ function AgentsContent() {
               placeholder="Search agents..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-white/5 border-white/10"
+              className="pl-9 bg-muted border-border"
             />
           </div>
-          <Button onClick={handleNewAgent} className="bg-teal-500 hover:bg-teal-400">
+          <Button onClick={handleNewAgent} className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="h-4 w-4 mr-2" />
             New Agent
           </Button>
@@ -163,9 +163,9 @@ function AgentsContent() {
         <ScrollArea className="flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2">
             {filteredAgents.map((agent) => (
-              <GlassCard
+              <Panel
                 key={agent.id}
-                className={`p-4 cursor-pointer transition-all ${selectedAgent?.id === agent.id ? "ring-2 ring-teal-500" : ""
+                className={`p-4 cursor-pointer transition-all ${selectedAgent?.id === agent.id ? "ring-2 ring-ring" : ""
                   }`}
                 onClick={() => handleSelectAgent(agent.id)}
               >
@@ -173,10 +173,10 @@ function AgentsContent() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold truncate">{agent.name}</h3>
-                      {agent.isFavorite && <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />}
+                      {agent.isFavorite && <Star className="h-3 w-3 fill-marker text-marker flex-shrink-0" />}
                     </div>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      <Badge variant="secondary" className="text-[10px] px-1 h-4 uppercase font-bold bg-white/10">
+                      <Badge variant="secondary" className="text-[10px] px-1 h-4 uppercase font-bold bg-accent">
                         {agent.provider || "openai"}
                       </Badge>
                       <Badge variant="outline" className="text-[10px] px-1 h-4">
@@ -214,7 +214,7 @@ function AgentsContent() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 text-red-400 hover:text-red-300"
+                    className="h-8 w-8 text-destructive hover:text-destructive"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleDeleteClick(agent)
@@ -223,14 +223,14 @@ function AgentsContent() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-              </GlassCard>
+              </Panel>
             ))}
           </div>
         </ScrollArea>
 
         {isLoading && (
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center z-50 rounded-2xl">
-            <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
+          <div className="absolute inset-0 bg-card flex items-center justify-center z-50 rounded-md">
+            <Loader2 className="h-8 w-8 animate-spin text-foreground" />
           </div>
         )}
       </div>

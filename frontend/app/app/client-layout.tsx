@@ -21,8 +21,7 @@ export default function ClientLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-black via-gray-950 to-black">
-      {/* <CHANGE> Sidebar always visible on desktop, responsive width */}
+    <div className="flex h-screen bg-background">
       <aside className="hidden lg:block h-full">
         <AppSidebar />
       </aside>

@@ -140,11 +140,11 @@ function AgentEditForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">Agent Name</FormLabel>
+                <FormLabel className="text-muted-foreground">Agent Name</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="e.g., Content Writer" 
-                    className="bg-white/5 border-white/10 h-11 focus:ring-teal-500/20" 
+                    className="bg-muted border-border h-11" 
                     {...field} 
                   />
                 </FormControl>
@@ -158,14 +158,14 @@ function AgentEditForm({
             name="provider"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">AI Provider</FormLabel>
+                <FormLabel className="text-muted-foreground">AI Provider</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-white/5 border-white/10 h-11">
+                    <SelectTrigger className="bg-muted border-border h-11">
                       <SelectValue placeholder="Select a provider" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="bg-black/95 border-white/10">
+                  <SelectContent className="bg-popover border-border">
                     <SelectItem value="openai">OpenAI</SelectItem>
                     <SelectItem value="gemini">Google Gemini</SelectItem>
                   </SelectContent>
@@ -181,12 +181,12 @@ function AgentEditForm({
           name="systemPrompt"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-400">System Prompt</FormLabel>
+              <FormLabel className="text-muted-foreground">System Prompt</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Define how your agent should behave..."
                   rows={8}
-                  className="bg-white/5 border-white/10 resize-none focus:ring-teal-500/20"
+                  className="bg-muted border-border resize-none"
                   {...field}
                 />
               </FormControl>
@@ -201,14 +201,14 @@ function AgentEditForm({
             name="model"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">Model</FormLabel>
+                <FormLabel className="text-muted-foreground">Model</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-white/5 border-white/10 h-11">
+                    <SelectTrigger className="bg-muted border-border h-11">
                       <SelectValue placeholder="Select a model" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="bg-black/95 border-white/10 border-teal-500/20">
+                  <SelectContent className="bg-popover border-border border-border">
                     {availableModels.map((model) => (
                       <SelectItem key={model.id} value={model.id}>
                         {model.name}
@@ -226,11 +226,11 @@ function AgentEditForm({
             name="maxTokens"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-400">Max Tokens</FormLabel>
+                <FormLabel className="text-muted-foreground">Max Tokens</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    className="bg-white/5 border-white/10 h-11 focus:ring-teal-500/20"
+                    className="bg-muted border-border h-11"
                     {...field}
                     onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 0)}
                   />
@@ -246,7 +246,7 @@ function AgentEditForm({
           name="temperature"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-400">
+              <FormLabel className="text-muted-foreground">
                 Temperature: {field.value.toFixed(1)}
               </FormLabel>
               <FormControl>
@@ -274,12 +274,12 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-zinc-950 border-white/10 max-w-2xl h-[90vh] !flex flex-col p-0 overflow-hidden shadow-2xl">
-          <DialogHeader className="p-8 pb-4 flex-shrink-0 border-b border-white/5">
+        <DialogContent className="bg-popover border-border max-w-2xl h-[90vh] !flex flex-col p-0 overflow-hidden shadow-2xl">
+          <DialogHeader className="p-8 pb-4 flex-shrink-0 border-b border-border">
             <DialogTitle className="text-3xl font-bold tracking-tight">
               {agent ? "Edit Agent" : "Create New Agent"}
             </DialogTitle>
-            <DialogDescription className="text-zinc-400 text-lg">
+            <DialogDescription className="text-muted-foreground text-lg">
               Define your agent's identity, behavior, and specialized tools.
             </DialogDescription>
           </DialogHeader>
@@ -294,12 +294,12 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
             />
           </ScrollArea>
 
-          <DialogFooter className="p-8 pt-4 border-t border-white/10 flex-shrink-0 bg-black/40">
+          <DialogFooter className="p-8 pt-4 border-t border-border flex-shrink-0 bg-card">
             <Button
               type="submit"
               form="agent-form"
               size="lg"
-              className="px-8 bg-teal-500 hover:bg-teal-400 text-black font-bold h-12"
+              className="px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-12"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -316,7 +316,7 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
               size="lg"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
-              className="px-8 text-zinc-400 hover:text-white h-12"
+              className="px-8 text-muted-foreground hover:text-foreground h-12"
             >
               Cancel
             </Button>
@@ -328,11 +328,11 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-zinc-950 border-white/10 h-[96dvh] max-h-[96dvh] flex flex-col p-0 rounded-t-[32px] overflow-hidden">
-        <div className="mx-auto w-12 h-1.5 bg-zinc-800 rounded-full mt-3 mb-1 shrink-0" />
+      <DrawerContent className="bg-popover border-border h-[96dvh] max-h-[96dvh] flex flex-col p-0 rounded-t-md overflow-hidden">
+        <div className="mx-auto w-12 h-1.5 bg-muted rounded-full mt-3 mb-1 shrink-0" />
         <DrawerHeader className="p-6 pb-2 flex-shrink-0 text-left">
           <DrawerTitle className="text-2xl font-bold">{agent ? "Edit Agent" : "New Agent"}</DrawerTitle>
-          <DrawerDescription className="text-zinc-400">Configure your AI assistant.</DrawerDescription>
+          <DrawerDescription className="text-muted-foreground">Configure your AI assistant.</DrawerDescription>
         </DrawerHeader>
 
         <ScrollArea className="flex-1 min-h-0 px-6 py-4">
@@ -345,11 +345,11 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
           />
         </ScrollArea>
 
-        <DrawerFooter className="p-6 pt-4 pb-12 border-t border-white/10 flex-shrink-0 flex flex-row gap-3 bg-black/60 backdrop-blur-md">
+        <DrawerFooter className="p-6 pt-4 pb-12 border-t border-border flex-shrink-0 flex flex-row gap-3 bg-card">
           <Button
             type="submit"
             form="agent-form"
-            className="flex-1 h-14 bg-teal-500 hover:bg-teal-400 text-black font-bold text-lg rounded-2xl shadow-lg shadow-teal-500/10"
+            className="flex-1 h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg rounded-md"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -364,7 +364,7 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSave, isLoading }
             <Button
               type="button"
               variant="outline"
-              className="flex-1 h-14 border-white/10 text-zinc-300 font-semibold text-lg rounded-2xl"
+              className="flex-1 h-14 border-border text-foreground/80 font-semibold text-lg rounded-md"
               disabled={isLoading}
             >
               Cancel

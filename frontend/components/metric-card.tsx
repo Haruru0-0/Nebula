@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react"
-import { GlassCard } from "./glass-card"
+import { Panel } from "./panel"
+import { Flap } from "./flap"
 
 interface MetricCardProps {
   title: string
@@ -13,21 +14,19 @@ interface MetricCardProps {
 
 export function MetricCard({ title, value, icon: Icon, trend }: MetricCardProps) {
   return (
-    <GlassCard hover={false} className="p-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground mb-1">{title}</p>
-          <p className="text-3xl font-bold">{value}</p>
-          {trend && (
-            <p className={`text-sm mt-2 ${trend.isPositive ? "text-teal-400" : "text-red-400"}`}>
-              {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%
-            </p>
-          )}
-        </div>
-        <div className="rounded-lg bg-teal-500/10 p-3">
-          <Icon className="h-6 w-6 text-teal-400" />
-        </div>
+    <Panel className="p-5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">{title}</p>
+        <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
       </div>
-    </GlassCard>
+      <p className="mt-3 text-3xl">
+        <Flap text={value} />
+      </p>
+      {trend && (
+        <p className="mt-3 text-sm text-muted-foreground">
+          {trend.isPositive ? "Up" : "Down"} {Math.abs(trend.value)}% on the previous period
+        </p>
+      )}
+    </Panel>
   )
 }

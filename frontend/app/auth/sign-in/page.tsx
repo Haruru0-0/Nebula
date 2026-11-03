@@ -11,9 +11,9 @@ import { loginUser, loginSelector, clearLoginState } from "@/lib/store/slices/au
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
-import { GlowBackground } from "@/components/glow-background"
-import { GlassCard } from "@/components/glass-card"
-import { Sparkles, Loader2 } from "lucide-react"
+import { Mark } from "@/components/mark"
+import { Panel } from "@/components/panel"
+import { Loader2 } from "lucide-react"
 import {
   Form,
   FormControl,
@@ -66,7 +66,7 @@ export default function SignInPage() {
             <div>{errorMessage}</div>
             <Link
               href={`/auth/verify-email?email=${encodeURIComponent(form.getValues("email"))}`}
-              className="text-teal-400 hover:text-teal-300 underline"
+              className="text-foreground underline underline-offset-4 underline"
             >
               Resend verification email
             </Link>
@@ -84,21 +84,19 @@ export default function SignInPage() {
   }
 
   return (
-    <GlowBackground className="min-h-screen" showOrb orbPosition="center">
+    <div className="min-h-screen bg-background">
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2 mb-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500">
-                <Sparkles className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold">NEBULA</span>
+              <Mark className="h-10 w-10" />
+              <span className="font-flap text-3xl font-semibold">Nebula</span>
             </Link>
-            <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
-            <p className="text-gray-400">Sign in to your account to continue</p>
+            <h1 className="font-flap text-4xl font-semibold mb-2">Welcome back</h1>
+            <p className="text-muted-foreground">Sign in to your account to continue</p>
           </div>
 
-          <GlassCard className="p-10">
+          <Panel className="p-10">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
@@ -111,7 +109,7 @@ export default function SignInPage() {
                       <FormControl>
                         <Input
                           placeholder="you@example.com"
-                          className="bg-white/5 border-white/10"
+                          className="bg-muted border-border"
                           {...field}
                         />
                       </FormControl>
@@ -130,7 +128,7 @@ export default function SignInPage() {
                         <Input
                           type="password"
                           placeholder="••••••••"
-                          className="bg-white/5 border-white/10"
+                          className="bg-muted border-border"
                           {...field}
                         />
                       </FormControl>
@@ -142,7 +140,7 @@ export default function SignInPage() {
                 <Button
                   type="submit"
                   disabled={isFetching}
-                  className="w-full bg-teal-500 hover:bg-teal-400 text-white shadow-lg shadow-teal-500/50 hover:shadow-teal-400/60 transition-all font-medium h-11"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all font-medium h-11"
                 >
                   {isFetching ? (
                     <>
@@ -157,16 +155,16 @@ export default function SignInPage() {
             </Form>
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-              <Link href="/auth/sign-up" className="text-teal-400 hover:text-teal-300 transition-colors font-medium">
+              <Link href="/auth/sign-up" className="text-foreground underline underline-offset-4 transition-colors font-medium">
                 Create new account
               </Link>
-              <Link href="/auth/forgot-password" className="text-gray-400 hover:text-gray-300 transition-colors">
+              <Link href="/auth/forgot-password" className="text-muted-foreground hover:text-foreground/80 transition-colors">
                 Forgot password?
               </Link>
             </div>
-          </GlassCard>
+          </Panel>
         </div>
       </div>
-    </GlowBackground>
+    </div>
   )
 }

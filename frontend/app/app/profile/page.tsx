@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "@/lib/store/store"
 import { getProfile, changePassword, profileSelector } from "@/lib/store/slices/auth/profileSlice"
-import { GlassCard } from "@/components/glass-card"
+import { Panel } from "@/components/panel"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -75,7 +75,7 @@ export default function ProfilePage() {
     if (isFetching) {
         return (
             <div className="flex items-center justify-center h-full">
-                <Loader2 className="h-8 w-8 animate-spin text-teal-400" />
+                <Loader2 className="h-8 w-8 animate-spin text-foreground" />
             </div>
         )
     }
@@ -91,9 +91,9 @@ export default function ProfilePage() {
 
             <div className="grid gap-6">
                 {/* Profile Information */}
-                <GlassCard className="p-6">
+                <Panel className="p-6">
                     <div className="flex items-center gap-2 mb-6">
-                        <User className="h-5 w-5 text-teal-400" />
+                        <User className="h-5 w-5 text-foreground" />
                         <h2 className="text-xl font-semibold">Profile Information</h2>
                     </div>
 
@@ -103,8 +103,8 @@ export default function ProfilePage() {
                                 <Label htmlFor="name" className="text-sm font-medium">
                                     Name
                                 </Label>
-                                <div className="flex items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-lg">
-                                    <User className="h-4 w-4 text-gray-400" />
+                                <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
+                                    <User className="h-4 w-4 text-muted-foreground" />
                                     <span className="text-sm">{user?.name || "Not set"}</span>
                                 </div>
                             </div>
@@ -113,8 +113,8 @@ export default function ProfilePage() {
                                 <Label htmlFor="email" className="text-sm font-medium">
                                     Email
                                 </Label>
-                                <div className="flex items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-lg">
-                                    <Mail className="h-4 w-4 text-gray-400" />
+                                <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
+                                    <Mail className="h-4 w-4 text-muted-foreground" />
                                     <span className="text-sm">{user?.email}</span>
                                 </div>
                             </div>
@@ -124,27 +124,27 @@ export default function ProfilePage() {
                             <Label className="text-sm font-medium">
                                 Member Since
                             </Label>
-                            <div className="flex items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-lg">
-                                <Calendar className="h-4 w-4 text-gray-400" />
+                            <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
                                 <span className="text-sm">
                                     {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Unknown"}
                                 </span>
                             </div>
                         </div>
                     </div>
-                </GlassCard>
+                </Panel>
 
                 {/* Change Password */}
-                <GlassCard className="p-6">
+                <Panel className="p-6">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-2">
-                            <User className="h-5 w-5 text-teal-400" />
+                            <User className="h-5 w-5 text-foreground" />
                             <h2 className="text-xl font-semibold">Change Password</h2>
                         </div>
                         {!showPasswordForm && (
                             <Button
                                 onClick={() => setShowPasswordForm(true)}
-                                className="bg-teal-500 hover:bg-teal-400 text-white"
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground"
                             >
                                 Change Password
                             </Button>
@@ -163,7 +163,7 @@ export default function ProfilePage() {
                                     value={passwords.oldPassword}
                                     onChange={(e) => handleInputChange("oldPassword", e.target.value)}
                                     placeholder="Enter your current password"
-                                    className="bg-white/5 border-white/10 focus:ring-teal-500/20"
+                                    className="bg-muted border-border"
                                 />
                             </div>
 
@@ -177,7 +177,7 @@ export default function ProfilePage() {
                                     value={passwords.newPassword}
                                     onChange={(e) => handleInputChange("newPassword", e.target.value)}
                                     placeholder="Enter your new password"
-                                    className="bg-white/5 border-white/10 focus:ring-teal-500/20"
+                                    className="bg-muted border-border"
                                 />
                             </div>
 
@@ -191,17 +191,17 @@ export default function ProfilePage() {
                                     value={passwords.confirmPassword}
                                     onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                                     placeholder="Confirm your new password"
-                                    className="bg-white/5 border-white/10 focus:ring-teal-500/20"
+                                    className="bg-muted border-border"
                                 />
                             </div>
 
-                            <Separator className="bg-white/10" />
+                            <Separator className="bg-accent" />
 
                             <div className="flex gap-3">
                                 <Button
                                     onClick={handlePasswordChange}
                                     disabled={isChangingPassword}
-                                    className="bg-teal-500 hover:bg-teal-400 text-white"
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                                 >
                                     {isChangingPassword ? (
                                         <>
@@ -219,18 +219,18 @@ export default function ProfilePage() {
                                         setPasswords({ oldPassword: "", newPassword: "", confirmPassword: "" })
                                     }}
                                     disabled={isChangingPassword}
-                                    className="border-white/10 text-gray-400 hover:text-white hover:bg-white/5"
+                                    className="border-border text-muted-foreground hover:text-foreground hover:bg-accent"
                                 >
                                     Cancel
                                 </Button>
                             </div>
                         </div>
                     ) : (
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                             Click the "Change Password" button above to update your password.
                         </p>
                     )}
-                </GlassCard>
+                </Panel>
             </div>
         </div>
     )

@@ -15,7 +15,7 @@ import { updateConversation, conversationUpdateSelector, clearConversationUpdate
 import { streamingChatSelector, startStreaming, appendToken, setConversationId, finishStreaming, setStreamingError, resetStreaming } from "@/lib/store/slices/chat/streamingChatSlice"
 import { SERVER_ADDR } from "@/lib/store/constant"
 import secureLocalStorage from "react-secure-storage"
-import { GlassCard } from "@/components/glass-card"
+import { Panel } from "@/components/panel"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -36,7 +36,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import {
   Send,
   ImageIcon,
-  Sparkles,
+  Bot,
   Plus,
   Trash2,
   MessageSquare,
@@ -345,9 +345,9 @@ function ChatPageContent() {
     <div className={cn("flex flex-col gap-4 h-full", mobile ? "w-full" : "w-full")}>
       <div className="flex flex-col gap-4 flex-1">
         {/* Conversations List */}
-        <GlassCard className="flex-1 flex flex-col overflow-hidden">
+        <Panel className="flex-1 flex flex-col overflow-hidden">
 
-          <div className="p-3 border-b border-white/10 flex items-center justify-between">
+          <div className="p-3 border-b border-border flex items-center justify-between">
             <h3 className="text-sm font-semibold">History</h3>
             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleNewConversation}>
               <Plus className="h-4 w-4" />
@@ -357,15 +357,15 @@ function ChatPageContent() {
             <div className="p-2 space-y-1">
               {!selectedAgentId ? (
                 <div className="text-center py-8 px-4">
-                  <Sparkles className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-400">Select an agent</p>
-                  <p className="text-xs text-gray-500 mt-1">to see chat history</p>
+                  <Bot className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Select an agent</p>
+                  <p className="text-xs text-muted-foreground mt-1">to see chat history</p>
                 </div>
               ) : currentConversations.length === 0 ? (
                 <div className="text-center py-8 px-4">
-                  <MessageSquare className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-400">No conversations yet</p>
-                  <p className="text-xs text-gray-500 mt-1">Start chatting to create one</p>
+                  <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No conversations yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Start chatting to create one</p>
                 </div>
               ) : (
                 currentConversations.map((conv) => {
@@ -387,8 +387,8 @@ function ChatPageContent() {
                       className={cn(
                         "w-full text-left p-3 rounded-lg transition-all text-sm group relative cursor-pointer",
                         isSelected
-                          ? "bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-500/30"
-                          : "border border-transparent hover:bg-white/5",
+                          ? "bg-secondary border border-border"
+                          : "border border-transparent hover:bg-accent",
                       )}
                     >
                       {isEditing ? (
@@ -396,7 +396,7 @@ function ChatPageContent() {
                           <Input
                             value={editingTitle}
                             onChange={(e) => setEditingTitle(e.target.value)}
-                            className="h-7 text-sm bg-white/10 border-white/20"
+                            className="h-7 text-sm bg-accent border-border"
                             autoFocus
                             onKeyDown={(e) => {
                               e.stopPropagation()
@@ -415,7 +415,7 @@ function ChatPageContent() {
                             }}
                             disabled={isRenaming}
                           >
-                            {isRenaming ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 text-green-400" />}
+                            {isRenaming ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 text-foreground" />}
                           </Button>
                           <Button
                             size="icon"
@@ -426,7 +426,7 @@ function ChatPageContent() {
                               handleCancelRename()
                             }}
                           >
-                            <X className="h-3 w-3 text-gray-400" />
+                            <X className="h-3 w-3 text-muted-foreground" />
                           </Button>
                         </div>
                       ) : (
@@ -445,7 +445,7 @@ function ChatPageContent() {
                                   handleStartRename({ id: conv.id, title: conv.title || conv.messages?.[0]?.content.slice(0, 30) || "New conversation" })
                                 }}
                               >
-                                <Pencil className="h-3 w-3 text-gray-400" />
+                                <Pencil className="h-3 w-3 text-muted-foreground" />
                               </Button>
                               <Button
                                 size="icon"
@@ -456,11 +456,11 @@ function ChatPageContent() {
                                   handleDeleteConversation({ id: conv.id, title: conv.title || conv.messages?.[0]?.content.slice(0, 30) || "New conversation" })
                                 }}
                               >
-                                <Trash2 className="h-3 w-3 text-red-400" />
+                                <Trash2 className="h-3 w-3 text-destructive" />
                               </Button>
                             </div>
                           </div>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-muted-foreground">
                             {conv.messages?.length || 0} messages • {new Date(conv.updatedAt).toLocaleDateString()}
                           </p>
                         </>
@@ -471,7 +471,7 @@ function ChatPageContent() {
               )}
             </div>
           </ScrollArea>
-        </GlassCard>
+        </Panel>
       </div>
     </div>
   )
@@ -484,19 +484,19 @@ function ChatPageContent() {
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 h-full">
-        <GlassCard className="flex-1 flex flex-col overflow-hidden relative">
+        <Panel className="flex-1 flex flex-col overflow-hidden relative">
           {/* Header */}
-          <div className="flex items-center justify-between gap-3 p-4 border-b border-white/10">
+          <div className="flex items-center justify-between gap-3 p-4 border-b border-border">
             <div className="flex items-center gap-3 min-w-0">
               {/* Mobile Sidebar Trigger */}
               <div className="lg:hidden">
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-400">
+                    <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
                       <MessageSquare className="h-5 w-5" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-[300px] bg-black/95 border-white/10 p-6 pt-12" title="Conversations" description="Chat conversations sidebar">
+                  <SheetContent side="left" className="w-[300px] bg-popover border-border p-6 pt-12" title="Conversations" description="Chat conversations sidebar">
                     <ConversationsSidebar mobile />
                   </SheetContent>
                 </Sheet>
@@ -504,12 +504,12 @@ function ChatPageContent() {
 
               {selectedAgent ? (
                 <>
-                  <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 flex-shrink-0">
-                    <Sparkles className="h-5 w-5 text-white" />
+                  <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-lg bg-secondary flex-shrink-0">
+                    <Bot className="h-5 w-5 text-foreground" />
                   </div>
                   <div className="min-w-0">
                     <h2 className="font-semibold truncate">{selectedAgent.name}</h2>
-                    <p className="text-xs text-gray-400 truncate">{selectedAgent.model}</p>
+                    <p className="text-xs text-muted-foreground truncate">{selectedAgent.model}</p>
                   </div>
                 </>
               ) : (
@@ -523,8 +523,8 @@ function ChatPageContent() {
           <ScrollArea className="flex-1 min-h-0 px-4 py-2" ref={scrollRef}>
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-teal-400/20 to-emerald-500/20 mb-4">
-                  <Sparkles className="h-10 w-10 text-teal-400" />
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary mb-4">
+                  <Bot className="h-10 w-10 text-foreground" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Start a conversation</h3>
                 <p className="text-sm text-muted-foreground max-w-md">
@@ -541,14 +541,14 @@ function ChatPageContent() {
                     className={cn("flex gap-3", message.role === "user" ? "justify-end" : "justify-start")}
                   >
                     {message.role === "assistant" && (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400/20 to-emerald-500/20 flex-shrink-0">
-                        <Sparkles className="h-4 w-4 text-teal-400" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary flex-shrink-0">
+                        <Bot className="h-4 w-4 text-foreground" />
                       </div>
                     )}
                     <div
                       className={cn(
-                        "rounded-2xl px-4 py-3 max-w-[85%] sm:max-w-[80%]",
-                        message.role === "user" ? "bg-teal-500/90 text-white" : "bg-white/5 border border-white/10",
+                        "rounded-md px-4 py-3 max-w-[85%] sm:max-w-[80%]",
+                        message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted border border-border",
                       )}
                     >
                       <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
@@ -558,20 +558,20 @@ function ChatPageContent() {
                 ))}
                 {isStreaming && (
                   <div className="flex gap-3 justify-start">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400/20 to-emerald-500/20">
-                      <Sparkles className="h-4 w-4 text-teal-400" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary">
+                      <Bot className="h-4 w-4 text-foreground" />
                     </div>
-                    <div className="rounded-2xl px-4 py-3 bg-white/5 border border-white/10 max-w-[85%] sm:max-w-[80%]">
+                    <div className="rounded-md px-4 py-3 bg-muted border border-border max-w-[85%] sm:max-w-[80%]">
                       {streamingContent ? (
                         <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                           {streamingContent}
-                          <span className="inline-block w-1.5 h-4 bg-teal-400 ml-0.5 animate-pulse" />
+                          <span className="inline-block w-1.5 h-4 bg-primary ml-0.5 motion-safe:animate-pulse" />
                         </p>
                       ) : (
                         <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" />
-                          <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                          <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                          <div className="w-2 h-2 bg-primary rounded-full motion-safe:animate-pulse" />
+                          <div className="w-2 h-2 bg-primary rounded-full motion-safe:animate-pulse [animation-delay:0.2s]" />
+                          <div className="w-2 h-2 bg-primary rounded-full motion-safe:animate-pulse [animation-delay:0.4s]" />
                         </div>
                       )}
                     </div>
@@ -582,8 +582,8 @@ function ChatPageContent() {
             )}
           </ScrollArea>
 
-          <div className="p-4 border-t border-white/10 bg-black/20">
-            <div className="bg-zinc-900/50 border border-white/10 rounded-2xl overflow-hidden">
+          <div className="p-4 border-t border-border bg-card">
+            <div className="bg-card border border-border rounded-md overflow-hidden">
               <Textarea
                 ref={textareaRef}
                 value={input}
@@ -601,7 +601,7 @@ function ChatPageContent() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-gray-400 hover:text-white hover:bg-white/10"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent"
                     disabled
                   >
                     <Plus className="h-4 w-4" />
@@ -609,7 +609,7 @@ function ChatPageContent() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-gray-400 hover:text-white hover:bg-white/10"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent"
                     disabled
                   >
                     <Paperclip className="h-4 w-4" />
@@ -617,7 +617,7 @@ function ChatPageContent() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-gray-400 hover:text-white hover:bg-white/10"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent"
                     disabled
                   >
                     <ImageIcon className="h-4 w-4" />
@@ -635,25 +635,25 @@ function ChatPageContent() {
                       }
                     }}
                   >
-                    <SelectTrigger className="h-8 border-white/10 bg-white/5 hover:bg-white/10 w-[160px] sm:w-[180px]">
+                    <SelectTrigger className="h-8 border-border bg-muted hover:bg-accent w-[160px] sm:w-[180px]">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <Wand2 className="h-3.5 w-3.5 text-teal-400 flex-shrink-0" />
+                        <Wand2 className="h-3.5 w-3.5 text-foreground flex-shrink-0" />
                         <div className="truncate text-left">
                           <SelectValue placeholder="Select Agent" />
                         </div>
                       </div>
                     </SelectTrigger>
-                    <SelectContent className="bg-black/95 border-white/10">
+                    <SelectContent className="bg-popover border-border">
                       {agents.map((agent: Agent) => (
-                        <SelectItem key={agent.id} value={agent.id} className="focus:bg-white/10">
+                        <SelectItem key={agent.id} value={agent.id} className="focus:bg-accent">
                           <div className="flex items-center gap-2">
-                            <Sparkles className="h-3.5 w-3.5 text-teal-400" />
+                            <Bot className="h-3.5 w-3.5 text-foreground" />
                             <span className="truncate">{agent.name}</span>
                           </div>
                         </SelectItem>
                       ))}
-                      <SelectItem value="__new__" className="focus:bg-white/10 border-t border-white/10 mt-1">
-                        <div className="flex items-center gap-2 text-teal-400 font-medium">
+                      <SelectItem value="__new__" className="focus:bg-accent border-t border-border mt-1">
+                        <div className="flex items-center gap-2 text-foreground font-medium">
                           <Plus className="h-3.5 w-3.5" />
                           New Agent
                         </div>
@@ -667,15 +667,15 @@ function ChatPageContent() {
                   onClick={handleSend}
                   disabled={!input.trim() || !selectedAgent || isStreaming}
                   size="icon"
-                  className="h-8 w-8 rounded-lg bg-teal-500 hover:bg-teal-400 disabled:opacity-30"
+                  className="h-8 w-8 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30"
                 >
-                  {isStreaming ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Send className="h-4 w-4" />}
+                  {isStreaming ? <Loader2 className="h-4 w-4 animate-spin text-foreground" /> : <Send className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
           </div>
 
-        </GlassCard>
+        </Panel>
       </div>
 
       <AgentEditDialog

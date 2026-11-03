@@ -45,17 +45,17 @@ export function AgentDeleteDialog({ open, onOpenChange, agent, onConfirm, isLoad
   if (isDesktop) {
     return (
       <AlertDialog open={open} onOpenChange={onOpenChange}>
-        <AlertDialogContent className="bg-black/95 border-white/10">
+        <AlertDialogContent className="bg-popover border-border">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete <span className="font-semibold text-white">{agent?.name}</span>. This action
+              This will permanently delete <span className="font-semibold text-foreground">{agent?.name}</span>. This action
               cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent border-white/10" disabled={isLoading}>Cancel</AlertDialogCancel>
-            <Button onClick={handleConfirm} className="bg-red-500 hover:bg-red-400 text-white" disabled={isLoading}>
+            <AlertDialogCancel className="bg-transparent border-border" disabled={isLoading}>Cancel</AlertDialogCancel>
+            <Button onClick={handleConfirm} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -73,16 +73,16 @@ export function AgentDeleteDialog({ open, onOpenChange, agent, onConfirm, isLoad
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-black/95 border-white/10">
+      <DrawerContent className="bg-popover border-border">
         <DrawerHeader>
           <DrawerTitle>Are you sure?</DrawerTitle>
           <DrawerDescription>
-            This will permanently delete <span className="font-semibold text-white">{agent?.name}</span>. This action
+            This will permanently delete <span className="font-semibold text-foreground">{agent?.name}</span>. This action
             cannot be undone.
           </DrawerDescription>
         </DrawerHeader>
         <DrawerFooter>
-          <Button onClick={handleConfirm} className="bg-red-500 hover:bg-red-400 text-white" disabled={isLoading}>
+          <Button onClick={handleConfirm} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { Mark } from "@/components/mark"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAppDispatch, useAppSelector } from "@/lib/store/store"
 import { getProfile, profileSelector, logout } from "@/lib/store/slices/auth/profileSlice"
@@ -21,7 +22,7 @@ import {
 import {
   MessageSquare,
   BarChart3,
-  Sparkles,
+  Bot,
   User as UserIcon,
   LogOut,
   UserCircle,
@@ -32,7 +33,7 @@ import {
 const routes = [
   {
     label: "Agents",
-    icon: Sparkles,
+    icon: Bot,
     href: "/app/agents",
   },
   {
@@ -66,17 +67,15 @@ export function AppSidebar() {
   return (
     <div
       className={cn(
-        "flex h-full flex-col border-r border-white/10 bg-black/40 backdrop-blur-xl transition-all duration-300",
+        "flex h-full flex-col border-r border-border bg-card transition-all duration-300",
         collapsed ? "w-20" : "w-64",
       )}
     >
       <div className="p-4 flex items-center justify-between">
         {!collapsed && (
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-xl font-bold">Nebula</span>
+            <Mark />
+            <span className="font-flap text-2xl font-semibold">Nebula</span>
           </Link>
         )}
         <Button
@@ -91,13 +90,11 @@ export function AppSidebar() {
 
       {collapsed && (
         <div className="flex justify-center mb-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
+          <Mark />
         </div>
       )}
 
-      <Separator className="bg-white/10" />
+      <Separator className="bg-accent" />
 
       <ScrollArea className="flex-1 px-3 py-4">
         <div className="space-y-1">
@@ -107,12 +104,16 @@ export function AppSidebar() {
               asChild
               variant="ghost"
               className={cn(
-                "w-full gap-3 h-11 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all rounded-lg",
-                pathname === route.href && "bg-white/10 text-white shadow-sm",
+                "w-full gap-3 h-11 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md",
+                pathname === route.href && "bg-accent text-foreground",
                 collapsed ? "justify-center px-0" : "justify-start",
               )}
             >
-              <Link href={route.href}>
+              <Link href={route.href} aria-current={pathname === route.href ? "page" : undefined}>
+                <span
+                  aria-hidden
+                  className={cn("h-2 w-2 flex-shrink-0 rounded-[1px]", pathname === route.href ? "bg-marker" : "bg-transparent")}
+                />
                 <route.icon className="h-5 w-5 flex-shrink-0" />
                 {!collapsed && <span>{route.label}</span>}
               </Link>
@@ -121,19 +122,19 @@ export function AppSidebar() {
         </div>
       </ScrollArea>
 
-      <div className="mt-auto p-3 border-t border-white/10">
+      <div className="mt-auto p-3 border-t border-border">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               className={cn(
-                "w-full gap-3 h-auto p-3 hover:bg-white/5 rounded-lg",
+                "w-full gap-3 h-auto p-3 hover:bg-accent rounded-lg",
                 collapsed ? "justify-center px-2" : "justify-start",
               )}
             >
-              <Avatar className="h-9 w-9 border-2 border-teal-500/50 flex-shrink-0">
+              <Avatar className="h-9 w-9 border-2 border-border flex-shrink-0">
                 <AvatarImage src="/abstract-geometric-shapes.png" alt="User" />
-                <AvatarFallback className="bg-gradient-to-br from-teal-400 to-emerald-500 text-white font-semibold text-xs caps">
+                <AvatarFallback className="bg-secondary text-foreground font-semibold text-xs ">
                   {user?.name
                     ? user.name
                       .split(" ")
@@ -147,20 +148,20 @@ export function AppSidebar() {
               {!collapsed && (
                 <div className="flex flex-col items-start flex-1 min-w-0">
                   <span className="text-sm font-medium truncate w-full">{user?.name || "User"}</span>
-                  <span className="text-xs text-gray-400 truncate w-full">{user?.email || ""}</span>
+                  <span className="text-xs text-muted-foreground truncate w-full">{user?.email || ""}</span>
                 </div>
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-black/95 border-white/10">
+          <DropdownMenuContent align="end" className="w-56 bg-popover border-border">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuSeparator className="bg-accent" />
             <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/app/profile')}>
               <UserCircle className="h-4 w-4 mr-2" />
               Profile
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem className="cursor-pointer text-red-400 focus:text-red-300" onClick={handleLogout}>
+            <DropdownMenuSeparator className="bg-accent" />
+            <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Logout
             </DropdownMenuItem>

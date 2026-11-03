@@ -9,10 +9,10 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/store"
 import { fetchAgents, agentFetchSelector } from "@/lib/store/slices/agents/agentFetchSlice"
 import type { Metrics, ApiResponse, MetricsResponse, Agent } from "@/types"
 import { MetricCard } from "@/components/metric-card"
-import { GlassCard } from "@/components/glass-card"
+import { Panel } from "@/components/panel"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Activity, Zap, MessageSquare, AlertCircle, Pause, Play, Sparkles } from "lucide-react"
+import { Activity, Zap, MessageSquare, AlertCircle, Pause, Play, Bot } from "lucide-react"
 import {
   LineChart,
   Line,
@@ -173,7 +173,7 @@ export default function AnalyticsPage() {
                 variant={timeRange === range ? "default" : "outline"}
                 size="sm"
                 onClick={() => setTimeRange(range)}
-                className={timeRange === range ? "bg-teal-500 hover:bg-teal-400" : ""}
+                className={timeRange === range ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
               >
                 {range}
               </Button>
@@ -185,18 +185,18 @@ export default function AnalyticsPage() {
             value={selectedAgentId || "all"}
             onValueChange={(value) => setSelectedAgentId(value === "all" ? null : value)}
           >
-            <SelectTrigger className="w-[200px] border-white/10 bg-white/5">
+            <SelectTrigger className="w-[200px] border-border bg-muted">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-teal-400" />
+                <Bot className="h-4 w-4 text-foreground" />
                 <SelectValue placeholder="All Agents" />
               </div>
             </SelectTrigger>
-            <SelectContent className="bg-black/95 border-white/10">
-              <SelectItem value="all" className="focus:bg-white/10">
+            <SelectContent className="bg-popover border-border">
+              <SelectItem value="all" className="focus:bg-accent">
                 <span className="font-medium">All Agents</span>
               </SelectItem>
               {agents.map((agent: Agent) => (
-                <SelectItem key={agent.id} value={agent.id} className="focus:bg-white/10">
+                <SelectItem key={agent.id} value={agent.id} className="focus:bg-accent">
                   {agent.name}
                 </SelectItem>
               ))}
@@ -248,82 +248,82 @@ export default function AnalyticsPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Latency Chart */}
-        <GlassCard className="p-6">
+        <Panel className="p-6">
           <h3 className="text-lg font-semibold mb-4">Latency Over Time</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={metrics.latencyHistory}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2c30" />
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={(time) => new Date(time).toLocaleTimeString()}
-                stroke="rgba(255,255,255,0.5)"
+                stroke="#a3a6ad"
                 fontSize={12}
               />
-              <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} />
+              <YAxis stroke="#a3a6ad" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "rgba(0,0,0,0.9)",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  backgroundColor: "#16171a",
+                  border: "1px solid #2a2c30",
                   borderRadius: "8px",
                 }}
                 labelFormatter={(time) => new Date(time).toLocaleTimeString()}
               />
-              <Line type="monotone" dataKey="value" stroke="#14b8a6" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="value" stroke="#f4f1e8" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
-        </GlassCard>
+        </Panel>
 
         {/* Tokens Chart */}
-        <GlassCard className="p-6">
+        <Panel className="p-6">
           <h3 className="text-lg font-semibold mb-4">Tokens Processed</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={metrics.tokensHistory}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2c30" />
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={(time) => new Date(time).toLocaleTimeString()}
-                stroke="rgba(255,255,255,0.5)"
+                stroke="#a3a6ad"
                 fontSize={12}
               />
-              <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} />
+              <YAxis stroke="#a3a6ad" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "rgba(0,0,0,0.9)",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  backgroundColor: "#16171a",
+                  border: "1px solid #2a2c30",
                   borderRadius: "8px",
                 }}
                 labelFormatter={(time) => new Date(time).toLocaleTimeString()}
               />
-              <Area type="monotone" dataKey="value" stroke="#14b8a6" fill="rgba(20,184,166,0.2)" strokeWidth={2} />
+              <Area type="monotone" dataKey="value" stroke="#f4f1e8" fill="rgba(244,241,232,0.12)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
-        </GlassCard>
+        </Panel>
 
         {/* Messages Chart */}
-        <GlassCard className="p-6 lg:col-span-2">
+        <Panel className="p-6 lg:col-span-2">
           <h3 className="text-lg font-semibold mb-4">Messages Per Interval</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={metrics.messagesHistory}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2c30" />
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={(time) => new Date(time).toLocaleTimeString()}
-                stroke="rgba(255,255,255,0.5)"
+                stroke="#a3a6ad"
                 fontSize={12}
               />
-              <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} />
+              <YAxis stroke="#a3a6ad" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "rgba(0,0,0,0.9)",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  backgroundColor: "#16171a",
+                  border: "1px solid #2a2c30",
                   borderRadius: "8px",
                 }}
                 labelFormatter={(time) => new Date(time).toLocaleTimeString()}
               />
-              <Bar dataKey="value" fill="#14b8a6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="value" fill="#f4f1e8" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </GlassCard>
+        </Panel>
       </div>
     </div>
   )

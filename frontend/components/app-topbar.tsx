@@ -11,7 +11,7 @@ interface AppTopbarProps {
 
 export function AppTopbar({ title }: AppTopbarProps) {
   return (
-    <div className="flex h-16 items-center justify-between border-b border-white/10 bg-black/20 backdrop-blur-xl px-6">
+    <div className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
       <div className="flex items-center gap-4">
         {/* Mobile Menu */}
         <Sheet>
@@ -20,12 +20,12 @@ export function AppTopbar({ title }: AppTopbarProps) {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-64 bg-black/95 border-white/10" title="Navigation Menu" description="Mobile navigation menu">
+          <SheetContent side="left" className="p-0 w-64 bg-popover border-border" title="Navigation Menu" description="Mobile navigation menu">
             <AppSidebar />
           </SheetContent>
         </Sheet>
 
-        <h1 className="text-xl font-semibold">{title}</h1>
+        <h1 className="font-flap text-2xl font-semibold">{title}</h1>
       </div>
     </div>
   )

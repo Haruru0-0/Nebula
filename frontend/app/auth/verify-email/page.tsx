@@ -6,9 +6,9 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/store"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { GlassCard } from "@/components/glass-card"
-import { GlowBackground } from "@/components/glow-background"
-import { Sparkles, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react"
+import { Panel } from "@/components/panel"
+import { Mark } from "@/components/mark"
+import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 import { verifyEmailUser, clearVerifyEmailState, verifyEmailSelector } from "@/lib/store/slices/auth/verifyEmailSlice"
@@ -118,38 +118,36 @@ function VerifyEmailForm() {
     if (isVerified) {
         return (
             <div className="w-full max-w-md">
-                <GlassCard className="p-10 text-center">
+                <Panel className="p-10 text-center">
                     <div className="flex justify-center mb-6">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
-                            <CheckCircle2 className="h-8 w-8 text-green-400" />
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                            <CheckCircle2 className="h-8 w-8 text-foreground" />
                         </div>
                     </div>
-                    <h1 className="text-2xl font-bold text-white mb-2">Email Verified!</h1>
-                    <p className="text-gray-400 mb-6">
+                    <h1 className="font-flap text-3xl font-semibold text-foreground mb-2">Email Verified!</h1>
+                    <p className="text-muted-foreground mb-6">
                         Your email has been successfully verified. You will be redirected to the dashboard shortly.
                     </p>
                     <Link href="/app/agents">
-                        <Button className="w-full bg-teal-500 hover:bg-teal-400 text-white">
+                        <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                             Continue to Dashboard
                         </Button>
                     </Link>
-                </GlassCard>
+                </Panel>
             </div>
         )
     }
 
     return (
         <div className="w-full max-w-md">
-            <GlassCard className="p-10">
+            <Panel className="p-10">
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-6">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-emerald-500">
-                            <Sparkles className="h-8 w-8 text-white" />
-                        </div>
+                        <Mark className="h-14 w-14" />
                     </div>
-                    <h1 className="text-2xl font-bold text-white mb-2">Verify Your Email</h1>
-                    <p className="text-gray-400">
-                        We've sent a verification code to <span className="text-white font-medium">{email}</span>
+                    <h1 className="font-flap text-3xl font-semibold text-foreground mb-2">Verify Your Email</h1>
+                    <p className="text-muted-foreground">
+                        We've sent a verification code to <span className="text-foreground font-medium">{email}</span>
                     </p>
                 </div>
 
@@ -164,11 +162,11 @@ function VerifyEmailForm() {
                             value={otp}
                             onChange={(e) => handleOtpChange(e.target.value)}
                             placeholder="Enter 6-digit code"
-                            className="text-center text-2xl tracking-widest bg-white/5 border-white/10 focus:ring-teal-500/20"
+                            className="text-center text-2xl tracking-widest bg-muted border-border"
                             maxLength={6}
                             autoComplete="one-time-code"
                         />
-                        <p className="text-xs text-gray-400 text-center">
+                        <p className="text-xs text-muted-foreground text-center">
                             Enter the 6-digit code sent to your email
                         </p>
                     </div>
@@ -176,7 +174,7 @@ function VerifyEmailForm() {
                     <Button
                         type="submit"
                         disabled={verifyEmailState.isVerifying || otp.length !== 6}
-                        className="w-full bg-teal-500 hover:bg-teal-400 text-white"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
                         {verifyEmailState.isVerifying ? (
                             <>
@@ -195,7 +193,7 @@ function VerifyEmailForm() {
                         variant="ghost"
                         onClick={handleResendOtp}
                         disabled={resendVerificationState.isResending}
-                        className="w-full text-gray-400 hover:text-white hover:bg-white/5"
+                        className="w-full text-muted-foreground hover:text-foreground hover:bg-accent"
                     >
                         {resendVerificationState.isResending ? (
                             <>
@@ -207,33 +205,33 @@ function VerifyEmailForm() {
                         )}
                     </Button>
 
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                         Code expires in 10 minutes
                     </div>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-white/10">
+                <div className="mt-8 pt-6 border-t border-border">
                     <Link
                         href="/auth/sign-up"
-                        className="flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                        className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Back to Sign Up
                     </Link>
                 </div>
-            </GlassCard>
+            </Panel>
         </div>
     )
 }
 
 export default function VerifyEmailPage() {
     return (
-        <GlowBackground>
+        <div className="min-h-screen bg-background">
             <div className="min-h-screen flex items-center justify-center p-4">
-                <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin text-teal-500" />}>
+                <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin text-foreground" />}>
                     <VerifyEmailForm />
                 </Suspense>
             </div>
-        </GlowBackground>
+        </div>
     )
 }
