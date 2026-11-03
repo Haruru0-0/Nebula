@@ -11,7 +11,7 @@ AI agent control center: create LLM agents, chat with them, watch live metrics. 
 - Default branch is `main`. Commit messages are plain, with no `Co-Authored-By` trailer.
 - The frontend look is "The Departure Board" (`frontend/DESIGN.md`, tokens in `frontend/app/globals.css`). Amber is only the active marker; red is errors only; no gradients or glass. Product truth is in `frontend/PRODUCT.md`.
 - Respect `prefers-reduced-motion`; keep text contrast at WCAG AA. Numbers shown outside the signed-in app must be labelled sample data.
-- Do not commit `backend/logs/*.log` changes.
+- Backend logs in `backend/logs/` are git-ignored; do not add them back.
 
 ## Memory and code map
 - At session start read `docs/memory/index.md`. Save durable decisions there as Markdown (`decisions.md`, `gotchas.md`, and so on).
