@@ -162,10 +162,11 @@ function AgentsContent() {
 
         <ScrollArea className="flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2">
-            {filteredAgents.map((agent) => (
+            {filteredAgents.map((agent, index) => (
               <Panel
                 key={agent.id}
-                className={`p-4 cursor-pointer transition-all ${selectedAgent?.id === agent.id ? "ring-2 ring-ring" : ""
+                style={{ animationDelay: `${Math.min(index, 8) * 55}ms`, animationFillMode: "both" }}
+                className={`p-4 cursor-pointer transition-all hover:-translate-y-0.5 animate-in fade-in-0 slide-in-from-bottom-3 duration-500 motion-reduce:animate-none motion-reduce:hover:translate-y-0 ${selectedAgent?.id === agent.id ? "ring-2 ring-ring" : ""
                   }`}
                 onClick={() => handleSelectAgent(agent.id)}
               >

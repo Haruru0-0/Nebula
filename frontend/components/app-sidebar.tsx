@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Mark } from "@/components/mark"
+import { motion } from "motion/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAppDispatch, useAppSelector } from "@/lib/store/store"
 import { getProfile, profileSelector, logout } from "@/lib/store/slices/auth/profileSlice"
@@ -104,16 +105,30 @@ export function AppSidebar() {
               asChild
               variant="ghost"
               className={cn(
-                "w-full gap-3 h-11 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md",
-                pathname === route.href && "bg-accent text-foreground",
+                "relative isolate w-full gap-3 h-11 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md",
+                pathname === route.href && "text-foreground hover:bg-transparent",
                 collapsed ? "justify-center px-0" : "justify-start",
               )}
             >
               <Link href={route.href} aria-current={pathname === route.href ? "page" : undefined}>
-                <span
-                  aria-hidden
-                  className={cn("h-2 w-2 flex-shrink-0 rounded-[1px]", pathname === route.href ? "bg-marker" : "bg-transparent")}
-                />
+                {pathname === route.href && (
+                  <motion.span
+                    aria-hidden
+                    layoutId="nav-lit"
+                    className="absolute inset-0 -z-10 rounded-md bg-accent"
+                    transition={{ type: "spring", stiffness: 380, damping: 34 }}
+                  />
+                )}
+                {pathname === route.href ? (
+                  <motion.span
+                    aria-hidden
+                    layoutId="nav-seal"
+                    className="h-2 w-2 flex-shrink-0 rounded-[1px] bg-marker"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                ) : (
+                  <span aria-hidden className="h-2 w-2 flex-shrink-0" />
+                )}
                 <route.icon className="h-5 w-5 flex-shrink-0" />
                 {!collapsed && <span>{route.label}</span>}
               </Link>

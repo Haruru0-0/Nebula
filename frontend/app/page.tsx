@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { LiveLanterns } from "@/components/live-lanterns"
 import { Mark } from "@/components/mark"
+import { Lens } from "@/components/glass-lens"
 
 const WHAT_IT_DOES = [
   {
@@ -29,19 +30,23 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen text-foreground">
       <div className="px-4 pt-4 sm:px-6">
-        <header className="glass mx-auto flex max-w-6xl items-center justify-between rounded-full py-2.5 pl-5 pr-3">
-          <Link href="/" className="relative z-10 flex items-center gap-3" aria-label="Nebula home">
-            <Mark />
-            <span className="text-xl font-semibold tracking-tight">Nebula</span>
-          </Link>
-          <nav className="relative z-10 flex items-center gap-2">
-            <Button asChild variant="ghost" className="rounded-full">
-              <Link href="/auth/sign-in">Sign in</Link>
-            </Button>
-            <Button asChild className="rounded-full">
-              <Link href="/auth/sign-up">Sign up</Link>
-            </Button>
-          </nav>
+        <header className="mx-auto max-w-6xl">
+          <Lens height={60} cornerRadius={999} squish={0.08}>
+            <div className="flex h-full w-full items-center justify-between pl-5 pr-3">
+              <Link href="/" className="flex items-center gap-3" aria-label="Nebula home">
+                <Mark />
+                <span className="text-xl font-semibold tracking-tight">Nebula</span>
+              </Link>
+              <nav className="flex items-center gap-2">
+                <Button asChild variant="ghost" className="rounded-full">
+                  <Link href="/auth/sign-in">Sign in</Link>
+                </Button>
+                <Button asChild className="rounded-full">
+                  <Link href="/auth/sign-up">Sign up</Link>
+                </Button>
+              </nav>
+            </div>
+          </Lens>
         </header>
       </div>
 

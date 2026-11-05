@@ -23,11 +23,14 @@ One family: Onest (`font-sans`). Headings 600 with tight tracking (-0.025em at d
 - `.lit` adds light from inside (an inner glow) and a downward cast light, always offset, never a zero-offset halo. `.flat` is the idle dashed outline.
 - `Backdrop` (`components/backdrop.tsx`): two faint spills of warm light behind every screen so the glass has something to blur.
 
+## Real Liquid Glass
+`components/glass-lens.tsx` wraps `liquid-glass-react`: the edges bend what is behind them, with a slight chromatic fringe and a springy squish toward the pointer. It is used on a few key surfaces (the landing nav and the lantern tiles), not on every panel, because each lens is an SVG filter. The `Backdrop` carries a faint lattice of lantern ribs so the bend is visible at the edges. Safari and Firefox get the frosted glass without the bend.
+
 ## Motion
-One authored moment: on the landing page the lanterns light in turn, then one brightens every few seconds as its numbers change and the red seal moves to it. Nothing else animates on its own. `prefers-reduced-motion` stops the lighting, the brightening and the slow breathing of the spills. `prefers-reduced-transparency` and browsers without `backdrop-filter` get solid panels.
+Built with `motion`. Landing: the lanterns rise and light in turn, then one flares every few seconds as its numbers count up and the red seal glides to it (shared-layout animation). App: pages fade and rise on route change, the sidebar highlight and seal glide between routes, metric numbers count up, agent cards and chat messages enter with a short rise, buttons press down, glass cards spring into place. `prefers-reduced-motion` removes all of it (and the lens squish). `prefers-reduced-transparency` and browsers without `backdrop-filter` get solid panels.
 
 ## Not used
-SVG refraction (the bend in the glass): it only works in Chromium, so the build uses blur and highlights only. No gradients as decoration, no coloured orbs, no second accent.
+No lens on dense panels or form cards, no gradients as decoration, no coloured orbs, no second accent.
 
 ## Content rules
 The landing lanterns are sample data and say so. No agency, services or pricing copy. No customer or performance claims.
