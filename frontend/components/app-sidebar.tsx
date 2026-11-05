@@ -67,7 +67,7 @@ export function AppSidebar() {
   return (
     <div
       className={cn(
-        "flex h-full flex-col border-r border-border bg-card transition-all duration-300",
+        "flex h-full flex-col border-r border-border glass-bar transition-all duration-300",
         collapsed ? "w-20" : "w-64",
       )}
     >
@@ -75,7 +75,7 @@ export function AppSidebar() {
         {!collapsed && (
           <Link href="/" className="flex items-center gap-2">
             <Mark />
-            <span className="font-flap text-2xl font-semibold">Nebula</span>
+            <span className="text-2xl font-semibold">Nebula</span>
           </Link>
         )}
         <Button

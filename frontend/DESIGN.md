@@ -1,31 +1,33 @@
 # Design
 
-All of Nebula's frontend (landing, auth, app) in "The Departure Board". Tokens live in `app/globals.css`; Nebula is dark only.
+All of Nebula's frontend (landing, auth, app) in "Glass Lanterns". Tokens and glass classes live in `app/globals.css`. Nebula is dark only. This replaced "The Departure Board" on 2026-11-05 (the author did not like it).
 
 ## World
-A split-flap departure board: every agent is a row, and numbers and status flip into place when they change.
+Liquid Glass whose light is the agent. A glass tile lit from inside is a working agent; a dashed outline is an idle one that has folded flat. Merges the author's chosen Lantern Room metaphor with the Liquid Glass material.
 
 ## Colour
-- Housing `#0e0f11`: the page. Flap black `#16171a`: cards and the board. Flap card `#26282c`: cells, muted fills.
-- Flap type `#f4f1e8`: text and primary buttons (dark text on them). Muted text `#a3a6ad` (about 7:1 on the page).
-- Marker amber `#f2b01e`: only the board header band and the single active marker (the last active agent row, the current sidebar route). It is never a button or link colour.
-- Red `#e0463a`: errors and destructive actions only.
-- Charts use off-white lines and grey grids; amber is not used for data.
+- Room `#110d0a`: the page. Calm surface `#18120d`: cards for dense content. Popover `#1c150f`. Muted fill `#241a12`. Border `#2e231a`.
+- Text `#f3e9d2` (about 14:1 on the room). Muted text `#b9ab91` (about 8:1).
+- Light `#f1d9a6`: primary buttons (dark text on them), focus ring, selection, the glow inside lit tiles and charts.
+- Seal vermilion `#d4463a`: the only accent. The logo, the active route marker, the last-active mark on a lit tile.
+- Errors: text `#ff8f73`; destructive buttons `#c23b32` with white text.
+- Glass tint `rgba(22,15,10,0.42)` over a blurred, saturated backdrop; edge `rgba(255,244,220,0.2)`.
 
 ## Type
-- Flap and headings: Barlow Semi Condensed 500/600 (`font-flap`).
-- Body and controls: Public Sans.
-- Flap cells (`components/flap.tsx`) show data in the board: names, status, latency, tokens, metric values. Prose never sits in flap cells.
+One family: Onest (`font-sans`). Headings 600 with tight tracking (-0.025em at display sizes), numbers tabular. No second typeface.
 
-## Components
-- `Panel` replaces the old glass card: flat, 1px border, 4px corners, no blur, no hover lift.
-- `LiveBoard` (landing): sample agents, labelled "Sample data", one row changes every 2.6 seconds and only changed cells flip. Reduced motion shows it still.
-- `MetricCard`: label, flap-cell value, plain-language trend.
-- `Mark`: an N on a flap card, split by the hinge line.
-- Buttons: off-white fill with dark text (primary) or an outline. No gradients, glows or coloured shadows.
+## Surfaces
+- `.glass`: tinted blur (22px, saturate 150%), a bright top edge, a specular corner highlight and an offset soft shadow. Used for the nav pill, lantern tiles and the auth forms (`GlassPanel`).
+- `.glass-bar`: the same blur without rounding, for the sidebar and top bar.
+- `Panel` (`components/panel.tsx`): calm near-solid card for dense content (agents, chat, analytics, profile). Glass is chrome; this is for reading.
+- `.lit` adds light from inside (an inner glow) and a downward cast light, always offset, never a zero-offset halo. `.flat` is the idle dashed outline.
+- `Backdrop` (`components/backdrop.tsx`): two faint spills of warm light behind every screen so the glass has something to blur.
 
 ## Motion
-One authored moment: the flip. Cells that change flip once (0.22s); everything else is still. `prefers-reduced-motion` removes the flip and the board's updates.
+One authored moment: on the landing page the lanterns light in turn, then one brightens every few seconds as its numbers change and the red seal moves to it. Nothing else animates on its own. `prefers-reduced-motion` stops the lighting, the brightening and the slow breathing of the spills. `prefers-reduced-transparency` and browsers without `backdrop-filter` get solid panels.
+
+## Not used
+SVG refraction (the bend in the glass): it only works in Chromium, so the build uses blur and highlights only. No gradients as decoration, no coloured orbs, no second accent.
 
 ## Content rules
-No agency, services or pricing copy. Any numbers shown outside the signed-in app are labelled as sample data.
+The landing lanterns are sample data and say so. No agency, services or pricing copy. No customer or performance claims.

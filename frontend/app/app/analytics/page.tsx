@@ -252,23 +252,23 @@ export default function AnalyticsPage() {
           <h3 className="text-lg font-semibold mb-4">Latency Over Time</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={metrics.latencyHistory}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2c30" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2e231a" />
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={(time) => new Date(time).toLocaleTimeString()}
-                stroke="#a3a6ad"
+                stroke="#b9ab91"
                 fontSize={12}
               />
-              <YAxis stroke="#a3a6ad" fontSize={12} />
+              <YAxis stroke="#b9ab91" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#16171a",
-                  border: "1px solid #2a2c30",
+                  backgroundColor: "#1c150f",
+                  border: "1px solid #2e231a",
                   borderRadius: "8px",
                 }}
                 labelFormatter={(time) => new Date(time).toLocaleTimeString()}
               />
-              <Line type="monotone" dataKey="value" stroke="#f4f1e8" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="value" stroke="#f1d9a6" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </Panel>
@@ -278,23 +278,23 @@ export default function AnalyticsPage() {
           <h3 className="text-lg font-semibold mb-4">Tokens Processed</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={metrics.tokensHistory}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2c30" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2e231a" />
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={(time) => new Date(time).toLocaleTimeString()}
-                stroke="#a3a6ad"
+                stroke="#b9ab91"
                 fontSize={12}
               />
-              <YAxis stroke="#a3a6ad" fontSize={12} />
+              <YAxis stroke="#b9ab91" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#16171a",
-                  border: "1px solid #2a2c30",
+                  backgroundColor: "#1c150f",
+                  border: "1px solid #2e231a",
                   borderRadius: "8px",
                 }}
                 labelFormatter={(time) => new Date(time).toLocaleTimeString()}
               />
-              <Area type="monotone" dataKey="value" stroke="#f4f1e8" fill="rgba(244,241,232,0.12)" strokeWidth={2} />
+              <Area type="monotone" dataKey="value" stroke="#f1d9a6" fill="rgba(241,217,166,0.14)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </Panel>
@@ -304,23 +304,23 @@ export default function AnalyticsPage() {
           <h3 className="text-lg font-semibold mb-4">Messages Per Interval</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={metrics.messagesHistory}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2c30" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2e231a" />
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={(time) => new Date(time).toLocaleTimeString()}
-                stroke="#a3a6ad"
+                stroke="#b9ab91"
                 fontSize={12}
               />
-              <YAxis stroke="#a3a6ad" fontSize={12} />
+              <YAxis stroke="#b9ab91" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#16171a",
-                  border: "1px solid #2a2c30",
+                  backgroundColor: "#1c150f",
+                  border: "1px solid #2e231a",
                   borderRadius: "8px",
                 }}
                 labelFormatter={(time) => new Date(time).toLocaleTimeString()}
               />
-              <Bar dataKey="value" fill="#f4f1e8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="value" fill="#f1d9a6" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Panel>

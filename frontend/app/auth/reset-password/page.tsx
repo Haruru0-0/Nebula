@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Mark } from "@/components/mark"
-import { Panel } from "@/components/panel"
+import { GlassPanel } from "@/components/panel"
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react"
 import {
     Form,
@@ -75,7 +75,7 @@ function ResetPasswordForm() {
 
     if (!token) {
         return (
-            <Panel className="p-10 text-center">
+            <GlassPanel className="p-10 text-center">
                 <div className="flex justify-center mb-6">
                     <div className="h-16 w-16 bg-red-500/10 rounded-full flex items-center justify-center">
                         <AlertCircle className="h-10 w-10 text-red-500" />
@@ -90,13 +90,13 @@ function ResetPasswordForm() {
                         Go to Forgot Password
                     </Button>
                 </Link>
-            </Panel>
+            </GlassPanel>
         )
     }
 
     if (isSuccess) {
         return (
-            <Panel className="p-10 text-center">
+            <GlassPanel className="p-10 text-center">
                 <div className="flex justify-center mb-6">
                     <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center">
                         <CheckCircle2 className="h-10 w-10 text-foreground" />
@@ -111,7 +111,7 @@ function ResetPasswordForm() {
                         Sign in now
                     </Button>
                 </Link>
-            </Panel>
+            </GlassPanel>
         )
     }
 
@@ -120,13 +120,13 @@ function ResetPasswordForm() {
             <div className="text-center mb-8">
                 <Link href="/" className="inline-flex items-center gap-2 mb-6">
                     <Mark className="h-10 w-10" />
-              <span className="font-flap text-3xl font-semibold">Nebula</span>
+              <span className="text-3xl font-semibold">Nebula</span>
                 </Link>
-                <h1 className="font-flap text-4xl font-semibold mb-2">Set new password</h1>
+                <h1 className="text-4xl font-semibold mb-2">Set new password</h1>
                 <p className="text-muted-foreground">Please enter your new password below</p>
             </div>
 
-            <Panel className="p-10">
+            <GlassPanel className="p-10">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
@@ -184,14 +184,14 @@ function ResetPasswordForm() {
                         </Button>
                     </form>
                 </Form>
-            </Panel>
+            </GlassPanel>
         </div>
     )
 }
 
 export default function ResetPasswordPage() {
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
             <div className="min-h-screen flex items-center justify-center p-6">
                 <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin text-foreground" />}>
                     <ResetPasswordForm />

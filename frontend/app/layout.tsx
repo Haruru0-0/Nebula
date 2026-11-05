@@ -1,18 +1,13 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Barlow_Semi_Condensed, Public_Sans } from "next/font/google"
+import { Onest } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { ReduxProvider } from "@/components/providers/redux-provider"
+import { Backdrop } from "@/components/backdrop"
 import { Toaster } from "sonner"
 
-const flapFace = Barlow_Semi_Condensed({
-  weight: ["500", "600"],
-  subsets: ["latin"],
-  variable: "--font-flap-face",
-  display: "swap",
-})
-const body = Public_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" })
+const body = Onest({ subsets: ["latin"], variable: "--font-body", display: "swap" })
 
 export const metadata: Metadata = {
   title: "Nebula - AI Agent Control Center",
@@ -33,8 +28,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${flapFace.variable} ${body.variable} dark`}>
-      <body className="font-sans antialiased">
+    <html lang="en" className={`${body.variable} dark`}>
+      <body className="font-sans antialiased relative isolate">
+        <Backdrop />
         <ReduxProvider>
           {children}
           <Toaster position="top-right" theme="dark" />

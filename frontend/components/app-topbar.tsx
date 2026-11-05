@@ -11,7 +11,7 @@ interface AppTopbarProps {
 
 export function AppTopbar({ title }: AppTopbarProps) {
   return (
-    <div className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
+    <div className="flex h-16 items-center justify-between border-b border-border glass-bar px-6">
       <div className="flex items-center gap-4">
         {/* Mobile Menu */}
         <Sheet>
@@ -25,7 +25,7 @@ export function AppTopbar({ title }: AppTopbarProps) {
           </SheetContent>
         </Sheet>
 
-        <h1 className="font-flap text-2xl font-semibold">{title}</h1>
+        <h1 className="text-2xl font-semibold">{title}</h1>
       </div>
     </div>
   )

@@ -10,4 +10,4 @@ Read this first. One line per note.
 
 Code map: `graphify-out/GRAPH_REPORT.md` (git-ignored; 1,223 nodes, 70 communities at the time of writing).
 
-Related files: `frontend/PRODUCT.md` (product truth), `frontend/DESIGN.md` (the "Departure Board" look), `frontend/.impeccable/surfaces/` (landing brief), `README.md`, `API_DOCUMENTATION.md`.
+Related files: `frontend/PRODUCT.md` (product truth), `frontend/DESIGN.md` (the "Glass Lanterns" look), `frontend/.impeccable/surfaces/` (landing brief), `README.md`, `API_DOCUMENTATION.md`.

@@ -13,3 +13,4 @@ See [[architecture]] for the pieces involved.
 - **No ESLint config in either package,** so `eslint` has nothing to run. Use `npx tsc --noEmit`.
 - **Application Control blocks `graphify.exe` on this machine.** Run `python -m graphify update .` instead (approved by the author). Graphify skips `.sql` files until `pip install "graphifyy[sql]"`.
 - **The app screens need a login and the backend,** so visual checks of agents, chat, analytics and profile need both running.
+- **Do not give a page wrapper an opaque background** (`bg-background` and similar): the glass look relies on the fixed `Backdrop` (`components/backdrop.tsx`, in the root layout) showing through, and an opaque wrapper hides it so glass panels look flat. Use `Panel` for calm surfaces and `GlassPanel` or `.glass` for glass.

@@ -28,7 +28,7 @@ Frontend: Next.js 16, React 19, Tailwind 4, Radix UI, Redux Toolkit with persist
 - Analytics: token usage, response latency, conversation analytics, live updates.
 - Auth: email and password with email verification and password reset.
 - Must respect `prefers-reduced-motion`, keep text contrast at WCAG AA, and work on phones.
-- Open decisions: the visual direction (decided in the next step), whether to show a live demo on the landing page without sign-in.
+- Open decisions: whether to show a live demo on the landing page without sign-in. (The visual direction is decided: see `DESIGN.md`.)
 
 ## Brand Commitments
 Keep the name "Nebula". The current logo (a sparkle icon on a teal gradient tile) is a stock icon and may be replaced.

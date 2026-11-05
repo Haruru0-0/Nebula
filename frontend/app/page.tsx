@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LiveBoard } from "@/components/live-board"
+import { LiveLanterns } from "@/components/live-lanterns"
 import { Mark } from "@/components/mark"
 
 const WHAT_IT_DOES = [
@@ -27,53 +27,55 @@ const BUILT_WITH = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-3" aria-label="Nebula home">
-          <Mark />
-          <span className="font-flap text-2xl font-semibold">Nebula</span>
-        </Link>
-        <nav className="flex items-center gap-2 sm:gap-3">
-          <Button asChild variant="ghost">
-            <Link href="/auth/sign-in">Sign in</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/auth/sign-up">Sign up</Link>
-          </Button>
-        </nav>
-      </header>
+    <div className="min-h-screen text-foreground">
+      <div className="px-4 pt-4 sm:px-6">
+        <header className="glass mx-auto flex max-w-6xl items-center justify-between rounded-full py-2.5 pl-5 pr-3">
+          <Link href="/" className="relative z-10 flex items-center gap-3" aria-label="Nebula home">
+            <Mark />
+            <span className="text-xl font-semibold tracking-tight">Nebula</span>
+          </Link>
+          <nav className="relative z-10 flex items-center gap-2">
+            <Button asChild variant="ghost" className="rounded-full">
+              <Link href="/auth/sign-in">Sign in</Link>
+            </Button>
+            <Button asChild className="rounded-full">
+              <Link href="/auth/sign-up">Sign up</Link>
+            </Button>
+          </nav>
+        </header>
+      </div>
 
       <main>
-        <section className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pt-16">
-          <h1 className="font-flap max-w-4xl text-5xl font-semibold leading-[1.02] tracking-tight text-balance sm:text-6xl lg:text-7xl">
-            Every agent, every model, one board.
+        <section className="mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6 sm:pt-20">
+          <h1 className="max-w-3xl text-5xl font-semibold leading-[1.02] tracking-tight text-balance sm:text-6xl lg:text-7xl">
+            See every agent working.
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
             Nebula is a control center for LLM agents. Set up an agent with a system prompt, a provider and a model,
             chat with it, and watch its tokens and latency as they change.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="rounded-full">
               <Link href="/auth/sign-up">Sign up</Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
+            <Button asChild size="lg" variant="outline" className="rounded-full">
               <Link href="/auth/sign-in">Sign in</Link>
             </Button>
           </div>
 
-          <div className="mt-12">
-            <LiveBoard />
+          <div className="mt-16">
+            <LiveLanterns />
           </div>
         </section>
 
         <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6" aria-labelledby="what-it-does">
-          <h2 id="what-it-does" className="font-flap text-3xl font-semibold sm:text-4xl">
+          <h2 id="what-it-does" className="text-3xl font-semibold tracking-tight sm:text-4xl">
             What it does
           </h2>
           <dl className="mt-8 grid max-w-4xl gap-x-12 gap-y-8 sm:grid-cols-3">
             {WHAT_IT_DOES.map((item) => (
               <div key={item.title}>
-                <dt className="font-flap text-2xl font-semibold">{item.title}</dt>
+                <dt className="text-xl font-semibold">{item.title}</dt>
                 <dd className="mt-2 leading-relaxed text-muted-foreground">{item.body}</dd>
               </div>
             ))}
@@ -81,7 +83,7 @@ export default function LandingPage() {
         </section>
 
         <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6" aria-labelledby="built-with">
-          <h2 id="built-with" className="font-flap text-3xl font-semibold sm:text-4xl">
+          <h2 id="built-with" className="text-3xl font-semibold tracking-tight sm:text-4xl">
             How it is built
           </h2>
           <ul className="mt-6 max-w-2xl divide-y divide-border border-y border-border">

@@ -4,56 +4,60 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  The Departure Board. Nebula is dark only: a matte housing, flap-black cards and off-white flap type.
-  Amber is reserved for marking the one active row or step. Red is for errors only.
+  Glass Lanterns. Nebula is dark only: a dim warm room, Liquid Glass panels, and light that means something.
+  A glass tile lit from inside is a working agent; a dashed outline is an idle one. One vermilion seal is the
+  only accent (logo, active marker, last-active mark). Dense content sits on calm near-solid surfaces.
 */
 :root {
-  --background: #0e0f11;
-  --foreground: #f4f1e8;
-  --card: #16171a;
-  --card-foreground: #f4f1e8;
-  --popover: #16171a;
-  --popover-foreground: #f4f1e8;
-  --primary: #f4f1e8;
-  --primary-foreground: #16171a;
-  --secondary: #26282c;
-  --secondary-foreground: #f4f1e8;
-  --muted: #26282c;
-  --muted-foreground: #a3a6ad;
-  --accent: #26282c;
-  --accent-foreground: #f4f1e8;
-  --destructive: #e0463a;
+  --background: #110d0a;
+  --foreground: #f3e9d2;
+  --card: #18120d;
+  --card-foreground: #f3e9d2;
+  --popover: #1c150f;
+  --popover-foreground: #f3e9d2;
+  --primary: #f1d9a6;
+  --primary-foreground: #17110b;
+  --secondary: #241a12;
+  --secondary-foreground: #f3e9d2;
+  --muted: #241a12;
+  --muted-foreground: #b9ab91;
+  --accent: #2a1f15;
+  --accent-foreground: #f3e9d2;
+  --destructive: #c23b32;
   --destructive-foreground: #ffffff;
-  --border: #2a2c30;
-  --input: #2a2c30;
-  --ring: #f4f1e8;
-  --marker: #f2b01e;
-  --marker-foreground: #16171a;
-  --chart-1: #f4f1e8;
-  --chart-2: #f2b01e;
-  --chart-3: #a3a6ad;
-  --chart-4: #6b6f77;
-  --chart-5: #e0463a;
-  --radius: 0.25rem;
-  --sidebar: #16171a;
-  --sidebar-foreground: #f4f1e8;
-  --sidebar-primary: #f2b01e;
-  --sidebar-primary-foreground: #16171a;
-  --sidebar-accent: #26282c;
-  --sidebar-accent-foreground: #f4f1e8;
-  --sidebar-border: #2a2c30;
-  --sidebar-ring: #f4f1e8;
+  --border: #2e231a;
+  --input: #2e231a;
+  --ring: #f1d9a6;
+  --light: #f1d9a6;
+  --marker: #d4463a;
+  --marker-foreground: #fff3df;
+  --error-text: #ff8f73;
+  --glass-tint: rgba(22, 15, 10, 0.42);
+  --glass-edge: rgba(255, 244, 220, 0.2);
+  --chart-1: #f1d9a6;
+  --chart-2: #b9ab91;
+  --chart-3: #8a7c63;
+  --chart-4: #d6c8ad;
+  --chart-5: #d4463a;
+  --radius: 0.75rem;
+  --sidebar: #17110c;
+  --sidebar-foreground: #f3e9d2;
+  --sidebar-primary: #d4463a;
+  --sidebar-primary-foreground: #fff3df;
+  --sidebar-accent: #2a1f15;
+  --sidebar-accent-foreground: #f3e9d2;
+  --sidebar-border: #2e231a;
+  --sidebar-ring: #f1d9a6;
   color-scheme: dark;
 }
 
 .dark {
-  --background: #0e0f11;
-  --foreground: #f4f1e8;
+  --background: #110d0a;
+  --foreground: #f3e9d2;
 }
 
 @theme inline {
   --font-sans: var(--font-body), system-ui, sans-serif;
-  --font-flap: var(--font-flap-face), "Arial Narrow", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -74,16 +78,18 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-light: var(--light);
   --color-marker: var(--marker);
   --color-marker-foreground: var(--marker-foreground);
+  --color-error-text: var(--error-text);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 1px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -103,11 +109,11 @@
     @apply bg-background text-foreground;
   }
   ::selection {
-    background: var(--foreground);
-    color: var(--background);
+    background: var(--light);
+    color: #17110b;
   }
   :focus-visible {
-    outline: 2px solid var(--foreground);
+    outline: 2px solid var(--light);
     outline-offset: 2px;
   }
   html {
@@ -120,56 +126,132 @@
   }
 }
 
-/* Split-flap cells */
-.flap {
+/* Liquid glass: tinted and blurred, a bright top edge, a specular corner and an offset shadow */
+.glass {
   position: relative;
-  display: inline-block;
-  min-width: 0.62em;
-  padding: 0 0.12em;
-  margin-right: 2px;
-  background: #26282c;
-  color: var(--foreground);
-  border-radius: 2px;
-  font-family: var(--font-flap);
-  font-weight: 500;
-  line-height: 1.5em;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
+  border-radius: 1.5rem;
+  background: linear-gradient(var(--glass-tint), var(--glass-tint)), rgba(255, 244, 220, 0.07);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 244, 220, 0.34), inset 0 -1px 0 rgba(255, 244, 220, 0.05),
+    0 28px 48px -26px rgba(0, 0, 0, 0.8);
 }
 
-.flap::after {
+.glass::before {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  background: #0e0f11;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(120% 70% at 12% -10%, rgba(255, 244, 220, 0.2), transparent 55%);
 }
 
-.flap-gap {
-  display: inline-block;
-  width: 0.4em;
+/* Glass that runs the full edge of the screen (sidebar, top bar): no rounding, one hairline */
+.glass-bar {
+  background: linear-gradient(var(--glass-tint), var(--glass-tint)), rgba(255, 244, 220, 0.05);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
 }
 
-@keyframes flap-flip {
-  0% {
-    transform: rotateX(90deg);
-    opacity: 0.4;
+/* A lit lantern: lit from inside, and its light falls on the room below (offset, never a halo) */
+.lit {
+  box-shadow: inset 0 1px 0 rgba(255, 244, 220, 0.4), inset 0 -1px 0 rgba(255, 244, 220, 0.06),
+    0 34px 56px -22px rgba(241, 217, 166, 0.38);
+}
+
+.lit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(85% 70% at 50% 108%, rgba(241, 217, 166, 0.42), rgba(241, 217, 166, 0.12) 55%, transparent 80%);
+}
+
+.lit > :not(.stamp) {
+  position: relative;
+  z-index: 1;
+}
+
+/* An idle agent folds flat: just a dashed outline */
+.flat {
+  border-radius: 1.5rem;
+  border: 1.5px dashed rgba(185, 171, 145, 0.5);
+  color: var(--muted-foreground);
+  background: rgba(255, 244, 220, 0.025);
+}
+
+/* Light spilling onto the room: gives the glass something to blur */
+.spill {
+  position: absolute;
+  border-radius: 9999px;
+  background: var(--light);
+  filter: blur(80px);
+  opacity: 0.22;
+}
+
+/* The one authored moment: lanterns light in turn, then one brightens when its numbers change */
+@keyframes glow-on {
+  from {
+    opacity: 0;
   }
-  100% {
-    transform: rotateX(0);
+  to {
     opacity: 1;
   }
 }
 
-.flap-flip {
-  animation: flap-flip 0.22s ease-out;
-  transform-origin: 50% 50%;
+.lighting::after {
+  animation: glow-on 0.9s ease-out both;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes bump {
+  0% {
+    filter: brightness(1.16);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+.bump {
+  animation: bump 0.9s ease-out;
+}
+
+@keyframes breathe {
+  to {
+    opacity: 0.34;
+    transform: scale(1.08);
+  }
+}
+
+.breathe {
+  animation: breathe 9s ease-in-out infinite alternate;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flap-flip {
+  .lighting::after,
+  .bump,
+  .breathe {
     animation: none;
+  }
+}
+
+/* Where glass cannot work, or the person asks for less transparency, panels turn solid */
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-bar {
+    background: var(--popover);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-bar {
+    background: var(--popover);
   }
 }

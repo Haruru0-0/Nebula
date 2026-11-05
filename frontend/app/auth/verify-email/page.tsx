@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/store"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Panel } from "@/components/panel"
+import { GlassPanel } from "@/components/panel"
 import { Mark } from "@/components/mark"
 import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
@@ -118,13 +118,13 @@ function VerifyEmailForm() {
     if (isVerified) {
         return (
             <div className="w-full max-w-md">
-                <Panel className="p-10 text-center">
+                <GlassPanel className="p-10 text-center">
                     <div className="flex justify-center mb-6">
                         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                             <CheckCircle2 className="h-8 w-8 text-foreground" />
                         </div>
                     </div>
-                    <h1 className="font-flap text-3xl font-semibold text-foreground mb-2">Email Verified!</h1>
+                    <h1 className="text-3xl font-semibold text-foreground mb-2">Email Verified!</h1>
                     <p className="text-muted-foreground mb-6">
                         Your email has been successfully verified. You will be redirected to the dashboard shortly.
                     </p>
@@ -133,19 +133,19 @@ function VerifyEmailForm() {
                             Continue to Dashboard
                         </Button>
                     </Link>
-                </Panel>
+                </GlassPanel>
             </div>
         )
     }
 
     return (
         <div className="w-full max-w-md">
-            <Panel className="p-10">
+            <GlassPanel className="p-10">
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-6">
                         <Mark className="h-14 w-14" />
                     </div>
-                    <h1 className="font-flap text-3xl font-semibold text-foreground mb-2">Verify Your Email</h1>
+                    <h1 className="text-3xl font-semibold text-foreground mb-2">Verify Your Email</h1>
                     <p className="text-muted-foreground">
                         We've sent a verification code to <span className="text-foreground font-medium">{email}</span>
                     </p>
@@ -219,14 +219,14 @@ function VerifyEmailForm() {
                         Back to Sign Up
                     </Link>
                 </div>
-            </Panel>
+            </GlassPanel>
         </div>
     )
 }
 
 export default function VerifyEmailPage() {
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
             <div className="min-h-screen flex items-center justify-center p-4">
                 <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin text-foreground" />}>
                     <VerifyEmailForm />

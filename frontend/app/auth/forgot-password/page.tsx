@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Mark } from "@/components/mark"
-import { Panel } from "@/components/panel"
+import { GlassPanel } from "@/components/panel"
 import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react"
 import {
     Form,
@@ -64,10 +64,10 @@ export default function ForgotPasswordPage() {
 
     if (isSubmitted) {
         return (
-            <div className="min-h-screen bg-background">
+            <div className="min-h-screen">
                 <div className="min-h-screen flex items-center justify-center p-6">
                     <div className="w-full max-w-md">
-                        <Panel className="p-10 text-center">
+                        <GlassPanel className="p-10 text-center">
                             <div className="flex justify-center mb-6">
                                 <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center">
                                     <CheckCircle2 className="h-10 w-10 text-foreground" />
@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
                                     Return to sign in
                                 </Button>
                             </Link>
-                        </Panel>
+                        </GlassPanel>
                     </div>
                 </div>
             </div>
@@ -90,19 +90,19 @@ export default function ForgotPasswordPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
             <div className="min-h-screen flex items-center justify-center p-6">
                 <div className="w-full max-w-md">
                     <div className="text-center mb-8">
                         <Link href="/" className="inline-flex items-center gap-2 mb-6">
                             <Mark className="h-10 w-10" />
-              <span className="font-flap text-3xl font-semibold">Nebula</span>
+              <span className="text-3xl font-semibold">Nebula</span>
                         </Link>
-                        <h1 className="font-flap text-4xl font-semibold mb-2">Reset password</h1>
+                        <h1 className="text-4xl font-semibold mb-2">Reset password</h1>
                         <p className="text-muted-foreground">Enter your email and we'll send you reset instructions</p>
                     </div>
 
-                    <Panel className="p-10">
+                    <GlassPanel className="p-10">
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
@@ -150,7 +150,7 @@ export default function ForgotPasswordPage() {
                                 Back to sign in
                             </Link>
                         </div>
-                    </Panel>
+                    </GlassPanel>
                 </div>
             </div>
         </div>

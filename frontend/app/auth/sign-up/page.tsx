@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Mark } from "@/components/mark"
-import { Panel } from "@/components/panel"
+import { GlassPanel } from "@/components/panel"
 import { Loader2 } from "lucide-react"
 import {
   Form,
@@ -87,19 +87,19 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2 mb-6">
               <Mark className="h-10 w-10" />
-              <span className="font-flap text-3xl font-semibold">Nebula</span>
+              <span className="text-3xl font-semibold">Nebula</span>
             </Link>
-            <h1 className="font-flap text-4xl font-semibold mb-2">Create your account</h1>
+            <h1 className="text-4xl font-semibold mb-2">Create your account</h1>
             <p className="text-muted-foreground">Get started with Nebula AI Platform</p>
           </div>
 
-          <Panel className="p-10">
+          <GlassPanel className="p-10">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
@@ -198,7 +198,7 @@ export default function SignUpPage() {
                 Sign in
               </Link>
             </div>
-          </Panel>
+          </GlassPanel>
         </div>
       </div>
     </div>

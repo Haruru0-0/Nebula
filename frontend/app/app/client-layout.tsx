@@ -21,7 +21,7 @@ export default function ClientLayout({
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen">
       <aside className="hidden lg:block h-full">
         <AppSidebar />
       </aside>
