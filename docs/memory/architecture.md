@@ -23,4 +23,4 @@ Monorepo with two packages: `backend/` (API) and `frontend/` (Next.js app).
 Sign up, then an emailed OTP verifies the address, then sign in returns JWTs. Agents belong to a user. Chat posts to an agent, replies stream as server-sent events, and conversations and messages are stored. Metrics (tokens, latency) are recorded per message and pushed live over the `/metrics` socket.
 
 ## Deployment
-GitHub `Haruru0-0/Nebula`, mirrored to a private GitLab copy by `mirror-to-gitlab.yml` on every push and nightly. Plan: frontend on Vercel, backend on Render now and a home server later; see [[gotchas]] for the proxy and env settings. The old Render URL is `https://nebula-g9er.onrender.com`.
+GitHub `Haruru0-0/Nebula`, mirrored to a private GitLab copy by `mirror-to-gitlab.yml` on every push and nightly. Plan: frontend on Vercel, backend on AWS Lambda (`backend/template.yaml`, `DEPLOY_LAMBDA.md`; Render is the fallback) and maybe a home server later; see [[gotchas]] for the proxy and env settings. The old Render URL is `https://nebula-g9er.onrender.com`.

@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Nebula API on Lambda. Express runs unchanged through the Lambda Web Adapter, with response streaming for chat.
+
+# Deploy with scripts/deploy-lambda.mjs: it reads backend/.env on your machine and passes the secrets below as
+# parameters, so they never go into this file or the repo.
+
+Parameters:
+  ClientUrl:
+    Type: String
+    Description: The frontend address (your Vercel URL). It is the only origin allowed to call the API directly.
+    Default: http://localhost:3000
+  DatabaseUrl:
+    Type: String
+    NoEcho: true
+  JwtSecret:
+    Type: String
+    NoEcho: true
+  JwtRefreshSecret:
+    Type: String
+    NoEcho: true
+    Description: No longer used by the code, but still required at startup.
+  KeyEncryptionSecret:
+    Type: String
+    NoEcho: true
+  SmtpHost:
+    Type: String
+    Default: smtp.gmail.com
+  SmtpPort:
+    Type: String
+    Default: '587'
+  SmtpUser:
+    Type: String
+    NoEcho: true
+  SmtpPassword:
+    Type: String
+    NoEcho: true
+  EmailFrom:
+    Type: String
+
+Resources:
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Timeout: 120
+      # A public address for the function. Express does its own CORS, so none is set here (it would double the headers).
+      # RESPONSE_STREAM lets chat replies reach the browser as they are written.
+      FunctionUrlConfig:
+        AuthType: NONE
+        InvokeMode: RESPONSE_STREAM
+      Environment:
+        Variables:
+          NODE_ENV: production
+          # No sockets and no log files on Lambda: live metrics fall back to the page's 15-second refresh
+          DISABLE_SOCKET: '1'
+          LOG_TO_FILES: '0'
+          # Vercel forwards API calls, then the Function URL: two hops in front of Express
+          TRUST_PROXY: '2'
+          COOKIE_SAMESITE: lax
+          JWT_EXPIRES_IN: 15m
+          SESSION_DAYS: '1'
+          SESSION_REMEMBER_DAYS: '30'
+          CLIENT_URL: !Ref ClientUrl
+          CORS_ORIGIN: !Ref ClientUrl
+          DATABASE_URL: !Ref DatabaseUrl
+          JWT_SECRET: !Ref JwtSecret
+          JWT_REFRESH_SECRET: !Ref JwtRefreshSecret
+          KEY_ENCRYPTION_SECRET: !Ref KeyEncryptionSecret
+          SMTP_HOST: !Ref SmtpHost
+          SMTP_PORT: !Ref SmtpPort
+          SMTP_USER: !Ref SmtpUser
+          SMTP_PASSWORD: !Ref SmtpPassword
+          EMAIL_FROM: !Ref EmailFrom
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: .
+      DockerTag: latest
+
+Outputs:
+  ApiUrl:
+    Description: The API address. Use it as BACKEND_URL on Vercel (no /api), and with /api on the end as NEXT_PUBLIC_DIRECT_API_URL.
+    Value: !GetAtt ApiFunctionUrl.FunctionUrl

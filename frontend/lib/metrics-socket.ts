@@ -7,6 +7,8 @@ import { DIRECT_API_ADDR } from "@/lib/store/constant"
  * one-minute token for the handshake.
  */
 export async function openMetricsSocket(): Promise<Socket> {
+  // Off when the backend cannot hold sockets (Lambda): the page keeps refreshing on its own timer instead
+  if (process.env.NEXT_PUBLIC_LIVE_METRICS === "off") throw new Error("Live metrics are off")
   const res = await api.get<{ data: { token: string } }>("/auth/socket-token")
   const socketUrl = DIRECT_API_ADDR.replace(/\/api\/?$/, "")
   return io(`${socketUrl}/metrics`, { auth: { token: res.data.data.token } })

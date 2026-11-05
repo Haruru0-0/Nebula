@@ -6,3 +6,8 @@ node_modules
 # runtime logs
 logs/
 *.log
+
+# SAM
+.aws-sam/
+samconfig.toml
+.lambda-build/

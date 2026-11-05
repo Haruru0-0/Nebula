@@ -8,15 +8,19 @@ const PORT = process.env.PORT || 5000;
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
+// Live metrics need a connection that stays open, which Lambda cannot hold. DISABLE_SOCKET=1 (set on Lambda) skips
+// Socket.io; the Analytics page then relies on its 15-second refresh.
+if (process.env.DISABLE_SOCKET !== "1") {
+  const io = new Server(server, {
+    cors: {
+      origin: process.env.CLIENT_URL || "http://localhost:3000",
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
+  });
 
-setupMetricsSocket(io);
+  setupMetricsSocket(io);
+}
 
 server.listen(PORT, () => {
   logger.info(`🚀 Server running on port ${PORT}`);
