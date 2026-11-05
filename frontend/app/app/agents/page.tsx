@@ -11,7 +11,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Panel } from "@/components/panel"
 import { Badge } from "@/components/ui/badge"
-import { Search, Plus, Edit2, Copy, Trash2, Star, Loader2 } from "lucide-react"
+import Link from "next/link"
+import { motion, useReducedMotion } from "motion/react"
+import { Search, Plus, Edit2, Copy, Trash2, Star, Loader2, KeyRound, Bot } from "lucide-react"
+import { useApiKeys, providerName } from "@/hooks/use-api-keys"
 import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AgentEditDialog } from "@/components/agent-edit-dialog"
@@ -20,8 +23,10 @@ import type { Agent } from "@/types"
 
 function AgentsContent() {
   const dispatch = useAppDispatch()
+  const { isMissing } = useApiKeys()
 
   // Selectors
+  const reduceMotion = useReducedMotion()
   const { agents, isFetching: isFetchingAgents } = useAppSelector(agentFetchSelector)
   const { currentAgent: selectedAgent, isFetching: isFetchingDetail } = useAppSelector(agentDetailSelector)
   const { isDeleting, isSuccess: isDeleteSuccess, isError: isDeleteError, errorMessage: deleteError } = useAppSelector(agentDeleteSelector)
@@ -129,7 +134,8 @@ function AgentsContent() {
   const handleDeleteConfirm = () => {
     if (agentToDelete) {
       dispatch(deleteAgent(agentToDelete.id))
-      setAgentToDelete(null)
+      // Close right away; the toast reports the result. The agent stays set so the name does not vanish mid-fade.
+      setDeleteDialogOpen(false)
     }
   }
 
@@ -144,6 +150,17 @@ function AgentsContent() {
   return (
     <>
       <div className="h-full flex flex-col gap-6 p-6">
+        {agents.some((a) => isMissing(a.provider)) && (
+          <Panel className="flex flex-wrap items-center justify-between gap-3 border-marker/50 p-4">
+            <p className="flex items-center gap-2 text-sm">
+              <KeyRound className="h-4 w-4 shrink-0 text-error-text" aria-hidden />
+              Some of your agents have no API key yet, so they cannot answer in chat.
+            </p>
+            <Button asChild size="sm">
+              <Link href="/app/profile">Add an API key</Link>
+            </Button>
+          </Panel>
+        )}
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -161,12 +178,48 @@ function AgentsContent() {
         </div>
 
         <ScrollArea className="flex-1">
+          {filteredAgents.length === 0 && !isFetchingAgents && (
+            <div className="mx-2 mt-2 flex flex-col items-center rounded-xl border border-dashed border-border px-6 py-16 text-center">
+              <Bot className="mb-4 h-8 w-8 text-muted-foreground" aria-hidden />
+              {agents.length === 0 ? (
+                <>
+                  <h2 className="text-lg font-semibold">No agents yet</h2>
+                  <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                    An agent is a model with a role. Give it a name and a prompt, pick a provider, and it shows up here, ready to chat.
+                  </p>
+                  <Button onClick={handleNewAgent} className="mt-5">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create your first agent
+                  </Button>
+                  <p className="mt-4 max-w-sm text-xs text-muted-foreground">
+                    You will need an API key from OpenAI, Gemini or DeepSeek to chat. Add one in{" "}
+                    <Link href="/app/profile" className="underline underline-offset-2 hover:text-foreground">
+                      Profile
+                    </Link>
+                    .
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-lg font-semibold">No agents match "{searchQuery}"</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Try a different name, or clear the search.</p>
+                  <Button variant="outline" onClick={() => setSearchQuery("")} className="mt-5">
+                    Clear search
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2">
             {filteredAgents.map((agent, index) => (
-              <Panel
+              <motion.div
                 key={agent.id}
-                style={{ animationDelay: `${Math.min(index, 8) * 55}ms`, animationFillMode: "both" }}
-                className={`p-4 cursor-pointer transition-all hover:-translate-y-0.5 animate-in fade-in-0 slide-in-from-bottom-3 duration-500 motion-reduce:animate-none motion-reduce:hover:translate-y-0 ${selectedAgent?.id === agent.id ? "ring-2 ring-ring" : ""
+                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: Math.min(index, 8) * 0.055, ease: [0.22, 1, 0.36, 1] }}
+              >
+              <Panel
+                className={`p-4 cursor-pointer transition-[transform,box-shadow,border-color] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 ${selectedAgent?.id === agent.id ? "ring-2 ring-ring" : ""
                   }`}
                 onClick={() => handleSelectAgent(agent.id)}
               >
@@ -186,6 +239,16 @@ function AgentsContent() {
                     </div>
                   </div>
                 </div>
+                {isMissing(agent.provider) && (
+                  <Link
+                    href="/app/profile"
+                    onClick={(e) => e.stopPropagation()}
+                    className="mb-2 inline-flex items-center gap-1 text-xs text-error-text underline-offset-4 hover:underline"
+                  >
+                    <KeyRound className="h-3 w-3" aria-hidden />
+                    No {providerName(agent.provider || "openai")} key yet. Add one
+                  </Link>
+                )}
                 <p className="text-xs text-muted-foreground mb-3">
                   Updated {new Date(agent.updatedAt).toLocaleDateString()}
                 </p>
@@ -225,11 +288,13 @@ function AgentsContent() {
                   </Button>
                 </div>
               </Panel>
+              </motion.div>
             ))}
           </div>
         </ScrollArea>
 
-        {isLoading && (
+        {/* Only block the page on the first load. Opening Edit fetches the agent's details; covering the page for that looked like a black flash. */}
+        {isFetchingAgents && agents.length === 0 && (
           <div className="absolute inset-0 bg-card flex items-center justify-center z-50 rounded-md">
             <Loader2 className="h-8 w-8 animate-spin text-foreground" />
           </div>

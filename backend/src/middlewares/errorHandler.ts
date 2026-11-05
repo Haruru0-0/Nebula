@@ -1,16 +1,24 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import logger from "../utils/logger";
 
 interface CustomError extends Error {
   statusCode?: number;
+  status?: number; // set by body-parser and some middleware
   code?: string;
 }
 
 export const errorHandler = (
   err: CustomError,
   req: Request,
-  res: Response
+  res: Response,
+  // Express only treats a function with four parameters as an error handler, so this one must stay
+  _next: NextFunction
 ): void => {
+  // Headers already sent (for example mid-stream): leave the response to Express
+  if (res.headersSent) {
+    _next(err);
+    return;
+  }
   logger.error("Error:", {
     message: err.message,
     stack: err.stack,
@@ -51,7 +59,7 @@ export const errorHandler = (
     return;
   }
 
-  const statusCode = err.statusCode || 500;
+  const statusCode = err.statusCode || (err.status && err.status >= 400 && err.status < 600 ? err.status : 500);
   const message = err.message || "Internal server error";
 
   res.status(statusCode).json({

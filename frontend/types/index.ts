@@ -9,8 +9,8 @@ export interface User {
 
 export interface AuthData {
   user: User
-  accessToken: string
-  refreshToken: string
+  /** When the login cookie ends (ms since the epoch). The tokens themselves are never sent to the page. */
+  expiresAt: number | null
 }
 
 export interface ApiResponse<T> {
@@ -23,7 +23,7 @@ export interface Agent {
   id: string
   name: string
   systemPrompt: string
-  provider?: 'openai' | 'gemini'
+  provider?: 'openai' | 'gemini' | 'deepseek'
   model: string
   temperature: number
   maxTokens: number
@@ -99,6 +99,8 @@ export interface MetricsResponse {
 export type LoginPayload = {
   email: string
   password: string
+  /** Stay signed in across browser restarts (the refresh cookie lasts 30 days instead of until the browser closes). */
+  rememberMe?: boolean
 }
 
 export type SignupPayload = LoginPayload & {

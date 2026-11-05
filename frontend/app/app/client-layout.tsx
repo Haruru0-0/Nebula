@@ -7,6 +7,7 @@ import { AppTopbar } from "@/components/app-topbar"
 import { usePathname } from "next/navigation"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { Toaster } from "@/components/ui/toaster"
+import { SessionGuard } from "@/components/session-guard"
 
 export default function ClientLayout({
   children,
@@ -34,7 +35,7 @@ export default function ClientLayout({
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={pathname}
-              className="min-h-full"
+              className="h-full"
               initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={reduce ? undefined : { opacity: 0, y: -6 }}
@@ -47,6 +48,7 @@ export default function ClientLayout({
       </div>
 
       <Toaster />
+      <SessionGuard />
     </div>
   )
 }

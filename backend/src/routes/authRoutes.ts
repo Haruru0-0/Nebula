@@ -13,5 +13,8 @@ router.post('/forgot-password', validate(schemas.forgotPassword), authController
 router.post('/reset-password', validate(schemas.resetPassword), authController.resetPassword);
 router.post('/change-password', authenticate, validate(schemas.changePassword), authController.changePassword);
 router.get('/profile', authenticate, authController.getProfile);
+router.post('/logout', authController.logout);
+router.post('/refresh', authController.refresh);
+router.get('/socket-token', authenticate, authController.socketToken);
 
 export default router;

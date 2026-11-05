@@ -12,6 +12,8 @@ import { motion } from "motion/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAppDispatch, useAppSelector } from "@/lib/store/store"
 import { getProfile, profileSelector, logout } from "@/lib/store/slices/auth/profileSlice"
+import api from "@/lib/store/api"
+import { setSessionExpiry } from "@/lib/session"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +63,8 @@ export function AppSidebar() {
   }, [dispatch])
 
   const handleLogout = () => {
+    setSessionExpiry(null)
+    api.post("/auth/logout").catch(() => {}) // drops the login cookie
     dispatch(logout())
     router.push("/auth/sign-in")
   }

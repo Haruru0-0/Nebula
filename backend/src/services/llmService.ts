@@ -3,19 +3,39 @@ import { GoogleGenAI } from "@google/genai";
 import logger from "../utils/logger";
 import { LLMResponse } from "../types";
 import { Agent, Message } from "../drizzle/schema";
-import { resolveApiKey, Provider } from "./apiKeyService";
+import { resolveApiKey, Provider, DEEPSEEK_BASE_URL } from "./apiKeyService";
 
 // Clients are created per request with the key of the user making it (their own key, else the shared server key).
 
-// OpenAI Implementation
+const toProvider = (v: string): Provider => (v === "gemini" ? "gemini" : v === "deepseek" ? "deepseek" : "openai");
+
+const clientFor = (provider: Provider, apiKey: string): OpenAI =>
+  provider === "deepseek" ? new OpenAI({ apiKey, baseURL: DEEPSEEK_BASE_URL }) : new OpenAI({ apiKey });
+
+/**
+ * Sampling and length settings for an OpenAI-style chat call. OpenAI's newer models (GPT-5 and later, o-series)
+ * only accept the default temperature and want max_completion_tokens; DeepSeek takes the classic fields.
+ */
+const chatParams = (provider: Provider, agent: Agent) => {
+  if (provider === "openai" && /^(gpt-[5-9]|o\d)/.test(agent.model)) {
+    return { max_completion_tokens: agent.maxTokens };
+  }
+  return { max_tokens: agent.maxTokens, temperature: agent.temperature };
+};
+
+const LABEL: Record<Provider, string> = { openai: "OpenAI", gemini: "Gemini", deepseek: "DeepSeek" };
+
+// OpenAI-compatible implementation (OpenAI and DeepSeek)
 const sendMessageOpenAI = async (
   agent: Agent,
   conversationHistory: Message[],
   userMessage: string,
-  apiKey: string
+  apiKey: string,
+  provider: Provider
 ): Promise<LLMResponse> => {
   const startTime = Date.now();
-  const openai = new OpenAI({ apiKey });
+  const openai = clientFor(provider, apiKey);
+  const label = LABEL[provider];
 
   try {
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -36,8 +56,7 @@ const sendMessageOpenAI = async (
     const response = await openai.chat.completions.create({
       model: agent.model,
       messages,
-      max_tokens: agent.maxTokens,
-      temperature: agent.temperature,
+      ...chatParams(provider, agent),
     });
 
     const responseLatency = Date.now() - startTime;
@@ -47,7 +66,7 @@ const sendMessageOpenAI = async (
     const tokensProcessed = usage.prompt_tokens + usage.completion_tokens;
 
     logger.info(
-      `OpenAI Response - Model: ${agent.model}, Tokens: ${tokensProcessed}, Latency: ${responseLatency}ms`
+      `${label} Response - Model: ${agent.model}, Tokens: ${tokensProcessed}, Latency: ${responseLatency}ms`
     );
 
     return {
@@ -61,19 +80,22 @@ const sendMessageOpenAI = async (
       },
     };
   } catch (error: any) {
-    logger.error("OpenAI Error:", error);
+    logger.error(`${label} Error:`, error);
 
     if (error.status === 429) {
       throw new Error("Rate limit exceeded. Please try again later.");
     }
     if (error.status === 401) {
-      throw new Error("OpenAI rejected your API key. Check it in Profile.");
+      throw new Error(`${label} rejected your API key. Check it in Profile.`);
     }
-    if (error.status === 400) {
-      throw new Error("Invalid request to OpenAI API");
+    if (error.status === 402) {
+      throw new Error(`${label} says your account is out of balance. Top it up and try again.`);
+    }
+    if (error.status === 400 || error.status === 404) {
+      throw new Error(`${label} could not use the model "${agent.model}". Pick another model for this agent.`);
     }
 
-    throw new Error("Failed to get response from OpenAI");
+    throw new Error(`Failed to get response from ${label}`);
   }
 };
 
@@ -150,14 +172,13 @@ export const sendMessage = async (
   userMessage: string,
   userId: string
 ): Promise<LLMResponse> => {
-  const provider: Provider = agent.provider === "gemini" ? "gemini" : "openai";
+  const provider = toProvider(agent.provider);
   const apiKey = await resolveApiKey(userId, provider);
 
   if (provider === "gemini") {
     return sendMessageGemini(agent, conversationHistory, userMessage, apiKey);
-  } else {
-    return sendMessageOpenAI(agent, conversationHistory, userMessage, apiKey);
   }
+  return sendMessageOpenAI(agent, conversationHistory, userMessage, apiKey, provider);
 };
 
 // Streaming support
@@ -174,7 +195,7 @@ export const streamMessage = async (
   provider: string;
 }> => {
   const startTime = Date.now();
-  const provider: Provider = agent.provider === "gemini" ? "gemini" : "openai";
+  const provider = toProvider(agent.provider);
   const apiKey = await resolveApiKey(userId, provider);
 
   if (provider === "gemini") {
@@ -212,7 +233,7 @@ export const streamMessage = async (
     }
   } else {
     try {
-      const openai = new OpenAI({ apiKey });
+      const openai = clientFor(provider, apiKey);
       const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
         {
           role: "system",
@@ -231,22 +252,30 @@ export const streamMessage = async (
       const stream = await openai.chat.completions.create({
         model: agent.model,
         messages,
-        max_tokens: agent.maxTokens,
-        temperature: agent.temperature,
+        ...chatParams(provider, agent),
         stream: true,
+        stream_options: { include_usage: true },
       });
 
       return {
         stream,
         startTime,
-        provider: "openai",
+        provider,
       };
     } catch (error) {
-      logger.error("OpenAI Streaming Error:", error);
-      if ((error as { status?: number })?.status === 401) {
-        throw new Error("OpenAI rejected your API key. Check it in Profile.");
+      const label = LABEL[provider];
+      logger.error(`${label} Streaming Error:`, error);
+      const status = (error as { status?: number })?.status;
+      if (status === 401) {
+        throw new Error(`${label} rejected your API key. Check it in Profile.`);
       }
-      throw new Error("Failed to initiate OpenAI streaming response");
+      if (status === 402) {
+        throw new Error(`${label} says your account is out of balance. Top it up and try again.`);
+      }
+      if (status === 400 || status === 404) {
+        throw new Error(`${label} could not use the model "${agent.model}". Pick another model for this agent.`);
+      }
+      throw new Error(`Failed to initiate ${label} streaming response`);
     }
   }
 };

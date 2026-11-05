@@ -33,7 +33,23 @@ export default function RootLayout({
         <Backdrop />
         <ReduxProvider>
           {children}
-          <Toaster position="top-right" theme="dark" />
+          <Toaster
+            position="top-right"
+            theme="dark"
+            toastOptions={{
+              unstyled: false,
+              classNames: {
+                toast:
+                  "!rounded-xl !border !border-[color:var(--glass-edge)] !bg-[color:var(--popover)] !text-[color:var(--popover-foreground)] !shadow-[0_12px_40px_rgba(0,0,0,0.45)] !font-sans",
+                title: "!font-medium",
+                description: "!text-[color:var(--muted-foreground)]",
+                success: "[&_[data-icon]]:!text-[color:var(--primary)]",
+                error: "!border-[color:var(--error-text)]/40 [&_[data-icon]]:!text-[color:var(--error-text)]",
+                actionButton: "!bg-[color:var(--primary)] !text-[color:var(--primary-foreground)]",
+                cancelButton: "!bg-transparent !text-[color:var(--muted-foreground)]",
+              },
+            }}
+          />
           <Analytics />
         </ReduxProvider>
       </body>

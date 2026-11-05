@@ -8,8 +8,7 @@ import { Panel } from "@/components/panel"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-type Provider = "openai" | "gemini"
+import { PROVIDERS, type Provider } from "@/lib/providers"
 
 interface KeysState {
   keys: { provider: Provider; hint: string; updatedAt: string }[]
@@ -17,19 +16,14 @@ interface KeysState {
   canSave: boolean
 }
 
-const PROVIDERS: { id: Provider; label: string; placeholder: string; where: string }[] = [
-  { id: "openai", label: "OpenAI", placeholder: "sk-...", where: "platform.openai.com/api-keys" },
-  { id: "gemini", label: "Google Gemini", placeholder: "AIza...", where: "aistudio.google.com/apikey" },
-]
-
 const messageOf = (error: unknown, fallback: string) =>
   (error as { response?: { data?: { message?: string } } })?.response?.data?.message || fallback
 
-/** Lets a signed-in user save their own OpenAI and Gemini keys. The server stores them encrypted and never sends them back. */
+/** Lets a signed-in user save their own OpenAI, Gemini and DeepSeek keys. The server stores them encrypted and never sends them back. */
 export function ApiKeysCard() {
   const [state, setState] = useState<KeysState | null>(null)
   const [loadError, setLoadError] = useState(false)
-  const [drafts, setDrafts] = useState<Record<Provider, string>>({ openai: "", gemini: "" })
+  const [drafts, setDrafts] = useState<Record<Provider, string>>({ openai: "", gemini: "", deepseek: "" })
   const [busy, setBusy] = useState<Provider | null>(null)
 
   const load = useCallback(async () => {

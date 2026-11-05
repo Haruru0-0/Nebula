@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import api from "../../api";
-import secureLocalStorage from "react-secure-storage";
+import { setSessionExpiry } from "../../../session";
 import { createAppAsyncThunk } from "../../createAppAsyncThunk";
 import { SignupPayload, AuthData, ApiResponse } from "@/types";
 
@@ -25,9 +25,7 @@ export const signupUser = createAppAsyncThunk(
             const response = await api.post<ApiResponse<AuthData>>("/auth/signup", payload);
             const { data } = response.data;
             if (response.status === 201 || response.status === 200) {
-                secureLocalStorage.setItem("accessToken", data.accessToken);
-                secureLocalStorage.setItem("refreshToken", data.refreshToken);
-                secureLocalStorage.setItem("user", JSON.stringify(data.user));
+                setSessionExpiry(data.expiresAt);
                 return data;
             } else {
                 return thunkAPI.rejectWithValue(response.data.message || "Signup failed");

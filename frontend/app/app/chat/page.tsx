@@ -1,5 +1,6 @@
 "use client"
 
+import { Markdown } from "@/components/markdown"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState, useRef, useEffect, Suspense, useMemo } from "react"
@@ -14,8 +15,8 @@ import { sendMessage as sendMessageAction, messageSendSelector, clearMessageSend
 import { deleteConversation, conversationDeleteSelector, clearConversationDeleteState } from "@/lib/store/slices/chat/conversationDeleteSlice"
 import { updateConversation, conversationUpdateSelector, clearConversationUpdateState } from "@/lib/store/slices/chat/conversationUpdateSlice"
 import { streamingChatSelector, startStreaming, appendToken, setConversationId, finishStreaming, setStreamingError, resetStreaming } from "@/lib/store/slices/chat/streamingChatSlice"
-import { SERVER_ADDR } from "@/lib/store/constant"
-import secureLocalStorage from "react-secure-storage"
+import { DIRECT_API_ADDR } from "@/lib/store/constant"
+import api from "@/lib/store/api"
 import { Panel } from "@/components/panel"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -233,12 +234,14 @@ function ChatPageContent() {
     dispatch(startStreaming(activeConversation?.id || null))
 
     try {
-      const token = secureLocalStorage.getItem("accessToken")
-      const response = await fetch(`${SERVER_ADDR}/chat/${selectedAgentId}/stream`, {
+      // The reply streams straight from the backend (a proxy may cut long streams), so it cannot use the cookie.
+      // The API hands out a one-minute token for the request instead.
+      const ticket = (await api.get<{ data: { token: string } }>("/auth/socket-token")).data.data.token
+      const response = await fetch(`${DIRECT_API_ADDR}/chat/${selectedAgentId}/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${ticket}`,
         },
         body: JSON.stringify({
           message: messageToSend,
@@ -557,7 +560,11 @@ function ChatPageContent() {
                         message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted border border-border",
                       )}
                     >
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+                      {message.role === "assistant" ? (
+                        <Markdown>{message.content}</Markdown>
+                      ) : (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+                      )}
                       <p className="text-xs opacity-60 mt-2">{new Date(message.createdAt).toLocaleTimeString()}</p>
                     </div>
                   </div>
@@ -569,10 +576,10 @@ function ChatPageContent() {
                     </div>
                     <div className="rounded-md px-4 py-3 bg-muted border border-border max-w-[85%] sm:max-w-[80%]">
                       {streamingContent ? (
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                          {streamingContent}
-                          <span className="inline-block w-1.5 h-4 bg-primary ml-0.5 motion-safe:animate-pulse" />
-                        </p>
+                        <div>
+                          <Markdown>{streamingContent}</Markdown>
+                          <span className="inline-block w-1.5 h-4 bg-primary mt-1 motion-safe:animate-pulse" aria-hidden />
+                        </div>
                       ) : (
                         <div className="flex gap-1">
                           <div className="w-2 h-2 bg-primary rounded-full motion-safe:animate-pulse" />

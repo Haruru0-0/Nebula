@@ -6,10 +6,13 @@ import { apiKeys } from "../drizzle/schema";
 import { config } from "../utils/config";
 import { decryptSecret, encryptSecret } from "../utils/secrets";
 
-export const PROVIDERS = ["openai", "gemini"] as const;
+export const PROVIDERS = ["openai", "gemini", "deepseek"] as const;
+
+export const DEEPSEEK_BASE_URL = "https://api.deepseek.com";
 export type Provider = (typeof PROVIDERS)[number];
 
-export const providerLabel = (p: Provider): string => (p === "gemini" ? "Gemini" : "OpenAI");
+const LABELS: Record<Provider, string> = { openai: "OpenAI", gemini: "Gemini", deepseek: "DeepSeek" };
+export const providerLabel = (p: Provider): string => LABELS[p];
 export const isProvider = (v: unknown): v is Provider => PROVIDERS.includes(v as Provider);
 
 /** Thrown when neither the user nor the server has a key for the agent's provider. */
@@ -22,12 +25,13 @@ export class ApiKeyMissingError extends Error {
 }
 
 const serverKey = (provider: Provider): string =>
-  provider === "gemini" ? config.geminiApiKey : config.openAiApiKey;
+  provider === "gemini" ? config.geminiApiKey : provider === "deepseek" ? config.deepseekApiKey : config.openAiApiKey;
 
 /** Which providers have a shared server key (so the app works without the user adding one). */
 export const serverKeyAvailable = (): Record<Provider, boolean> => ({
   openai: serverKey("openai").length > 0,
   gemini: serverKey("gemini").length > 0,
+  deepseek: serverKey("deepseek").length > 0,
 });
 
 /** The key to use for this user and provider: their own if saved, else the server's, else an error. */
@@ -80,12 +84,14 @@ export const keyLooksRejected = async (provider: Provider, apiKey: string): Prom
   try {
     if (provider === "openai") {
       await new OpenAI({ apiKey }).models.list();
+    } else if (provider === "deepseek") {
+      await new OpenAI({ apiKey, baseURL: DEEPSEEK_BASE_URL }).models.list();
     } else {
       await new GoogleGenAI({ apiKey }).models.list({ config: { pageSize: 1 } });
     }
     return false;
   } catch (error: any) {
-    if (provider === "openai") return error?.status === 401;
+    if (provider !== "gemini") return error?.status === 401;
     return /api key (not valid|is invalid)|API_KEY_INVALID|invalid api key/i.test(String(error?.message ?? ""));
   }
 };

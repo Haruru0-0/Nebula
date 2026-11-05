@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import api from "../../api";
-import secureLocalStorage from "react-secure-storage";
+import { setSessionExpiry } from "../../../session";
 import { createAppAsyncThunk } from "../../createAppAsyncThunk";
 import { User, ApiResponse } from "@/types";
 
@@ -29,10 +29,11 @@ export const getProfile = createAppAsyncThunk(
     "auth/profile",
     async (_, thunkAPI) => {
         try {
-            const response = await api.get<ApiResponse<{ user: User }>>("/auth/profile");
+            const response = await api.get<ApiResponse<{ user: User; sessionExpiresAt?: number | null }>>("/auth/profile");
             const { data } = response.data;
             if (response.status === 200) {
-                secureLocalStorage.setItem("user", JSON.stringify(data.user));
+                // Learn when the login cookie ends, so the app can end the session on time after a reload
+                setSessionExpiry(data.sessionExpiresAt);
                 return data.user;
             } else {
                 return thunkAPI.rejectWithValue(response.data.message || "Failed to fetch profile");
@@ -68,8 +69,6 @@ export const ProfileSlice = createSlice({
         },
         logout: (state) => {
             state.user = null;
-            secureLocalStorage.clear();
-            localStorage.removeItem("role");
         }
     },
     extraReducers: (builder) => {

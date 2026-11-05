@@ -20,6 +20,7 @@ export const config = {
   // Shared fallback keys. Optional: users can save their own keys instead (see apiKeyService).
   openAiApiKey: process.env.OPENAI_API_KEY ?? "",
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  deepseekApiKey: process.env.DEEPSEEK_API_KEY ?? "",
   // Encrypts users' saved keys. Required to save keys; generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
   keyEncryptionSecret: process.env.KEY_ENCRYPTION_SECRET ?? "",
   rateLimit: {

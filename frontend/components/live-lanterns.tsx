@@ -16,8 +16,8 @@ interface Agent {
 
 const START: Agent[] = [
   { name: "support-bot", model: "gpt-5-mini", lit: true, latency: 1204, tokens: 48210, height: 210 },
-  { name: "research-agent", model: "gemini-3.0-flash", lit: true, latency: 860, tokens: 129034, height: 250 },
-  { name: "summarizer", model: "gemini-3.0-pro", lit: true, latency: 412, tokens: 20977, height: 190 },
+  { name: "research-agent", model: "gemini-3.8-flash", lit: true, latency: 860, tokens: 129034, height: 250 },
+  { name: "summarizer", model: "gemini-3.1-pro", lit: true, latency: 412, tokens: 20977, height: 190 },
   { name: "code-review", model: "gpt-5", lit: false, latency: 0, tokens: 8120, height: 210 },
 ]
 

@@ -3,10 +3,19 @@ import { db } from '../drizzle/db';
 import { users } from '../drizzle/schema';
 import { eq, gt, and } from 'drizzle-orm';
 import { hashPassword, comparePassword, generateResetToken, hashResetToken, generateOTP, hashOTP } from '../utils/crypto';
-import { signAccessToken, signRefreshToken } from '../utils/jwt';
+import { signAccessToken, signSocketToken } from '../utils/jwt';
+import { clearAuthCookie, clearRefreshCookie, refreshCookieToken, setAuthCookie, setRefreshCookie } from '../utils/authCookie';
+import { RefreshError, endAllSessions, endOtherSessions, endSession, rotateSession, startSession, IssuedSession } from '../services/sessionService';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../services/emailService';
 import logger from '../utils/logger';
 import { AuthRequest, SignUpBody, SignInBody, ForgotPasswordBody, ResetPasswordBody, ChangePasswordBody, VerifyEmailBody, ResendVerificationBody } from '../types';
+
+/** Put both cookies in place for a sign-in or a refresh, and return when the whole sign-in ends. */
+const issueCookies = (res: Response, session: IssuedSession): number => {
+  setAuthCookie(res, signAccessToken(session.userId, session.sessionEndsAt));
+  setRefreshCookie(res, session.refreshToken, session.remember, session.sessionEndsAt);
+  return session.sessionEndsAt;
+};
 
 export const signUp = async (
   req: AuthRequest,
@@ -109,8 +118,8 @@ export const signIn = async (
       return;
     }
 
-    const accessToken = signAccessToken(user.id);
-    const refreshToken = signRefreshToken(user.id);
+    // The login goes in HttpOnly cookies; the response only says when the whole sign-in ends
+    const expiresAt = issueCookies(res, await startSession(user.id, Boolean(req.body.rememberMe)));
 
     logger.info(`User signed in: ${email}`);
 
@@ -123,8 +132,7 @@ export const signIn = async (
           email: user.email,
           name: user.name,
         },
-        accessToken,
-        refreshToken,
+        expiresAt,
       },
     });
   } catch (error) {
@@ -211,6 +219,7 @@ export const resetPassword = async (
       })
       .where(eq(users.id, user.id));
 
+    await endAllSessions(user.id); // a reset signs the account out everywhere
     logger.info(`Password reset successful for user: ${user.email}`);
 
     res.status(200).json({
@@ -264,6 +273,7 @@ export const changePassword = async (
       })
       .where(eq(users.id, user.id));
 
+    await endOtherSessions(user.id, refreshCookieToken(req)); // other devices must sign in again
     logger.info(`Password changed successfully for user: ${user.email}`);
 
     res.status(200).json({
@@ -322,8 +332,7 @@ export const verifyEmail = async (
       })
       .where(eq(users.id, user.id));
 
-    const accessToken = signAccessToken(user.id);
-    const refreshToken = signRefreshToken(user.id);
+    const expiresAt = issueCookies(res, await startSession(user.id, false));
 
     logger.info(`Email verified successfully for user: ${email}`);
 
@@ -337,8 +346,7 @@ export const verifyEmail = async (
           name: user.name,
           isVerified: true,
         },
-        accessToken,
-        refreshToken,
+        expiresAt,
       },
     });
   } catch (error) {
@@ -421,9 +429,50 @@ export const getProfile = async (
 
     res.status(200).json({
       success: true,
-      data: { user },
+      data: { user, sessionExpiresAt: req.sessionExpiresAt ?? null },
     });
   } catch (error) {
     next(error);
   }
+};
+
+/** Ends the session: the cookie is removed. Safe to call when not signed in. */
+export const logout = async (req: AuthRequest, res: Response): Promise<void> => {
+  await endSession(refreshCookieToken(req)).catch((error) => logger.warn(`Could not end session: ${error}`));
+  clearAuthCookie(res);
+  clearRefreshCookie(res);
+  res.status(200).json({ success: true, message: 'Signed out' });
+};
+
+/** Trade the refresh cookie for a new access token and a new refresh token. */
+export const refresh = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    // Cookie auth: require the custom header, like every other request that changes data
+    if (req.headers['x-requested-with'] !== 'nebula') {
+      res.status(403).json({ success: false, message: 'Missing request header' });
+      return;
+    }
+    const session = await rotateSession(refreshCookieToken(req));
+    const user = await db.query.users.findFirst({ where: eq(users.id, session.userId), columns: { id: true } });
+    if (!user) throw new RefreshError('unknown');
+    const sessionEndsAt = issueCookies(res, session);
+    res.status(200).json({ success: true, data: { sessionEndsAt } });
+  } catch (error) {
+    if (error instanceof RefreshError) {
+      // A reused token ends the sign-in; clear the cookies either way unless it was only a tab race
+      if (error.reason !== 'raced') {
+        clearAuthCookie(res);
+        clearRefreshCookie(res);
+      }
+      if (error.reason === 'reused') logger.warn('A refresh token was reused; its sign-in was ended');
+      res.status(401).json({ success: false, message: 'Session ended', reason: error.reason });
+      return;
+    }
+    next(error);
+  }
+};
+
+/** A one-minute token the page uses to open the live-metrics socket, which does not receive the cookie. */
+export const socketToken = (req: AuthRequest, res: Response): void => {
+  res.status(200).json({ success: true, data: { token: signSocketToken(req.user!.id) } });
 };

@@ -1,10 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { io, Socket } from "socket.io-client"
-import secureLocalStorage from "react-secure-storage"
+import type { Socket } from "socket.io-client"
+import { openMetricsSocket } from "@/lib/metrics-socket"
 import api from "@/lib/store/api"
-import { SERVER_ADDR } from "@/lib/store/constant"
 import type { Metrics, ApiResponse, MetricsResponse } from "@/types"
 
 const INITIAL_METRICS: Metrics = {
@@ -65,14 +64,22 @@ export function useLiveMetrics(timeRange: "1m" | "5m" | "15m" = "5m") {
       return
     }
 
-    const token = secureLocalStorage.getItem("accessToken")
-    const socketUrl = SERVER_ADDR.replace("/api", "")
+    // The socket opens once the API has issued a handshake token; until then there is nothing to clean up
+    let cancelled = false
+    let opened: Socket | null = null
+    openMetricsSocket()
+      .then((s) => {
+        if (cancelled) {
+          s.disconnect()
+          return
+        }
+        opened = s
+        socketRef.current = s
+        attach(s)
+      })
+      .catch(() => {})
 
-    const socket = io(`${socketUrl}/metrics`, {
-      auth: { token },
-    })
-
-    socketRef.current = socket
+    const attach = (socket: Socket) => {
 
     socket.on("metrics:update", (data: { metrics: any[], timestamp: string }) => {
       setMetrics((prev) => {
@@ -99,8 +106,11 @@ export function useLiveMetrics(timeRange: "1m" | "5m" | "15m" = "5m") {
       })
     })
 
+    }
+
     return () => {
-      socket.disconnect()
+      cancelled = true
+      opened?.disconnect()
     }
   }, [isPaused, maxDataPoints])
 

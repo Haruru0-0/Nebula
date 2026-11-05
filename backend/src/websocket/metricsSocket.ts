@@ -22,6 +22,9 @@ export const setupMetricsSocket = (io: Server): void => {
       }
 
       const decoded = verifyAccessToken(token);
+      if ((decoded as { purpose?: string }).purpose !== 'ticket') {
+        return next(new Error('Authentication error'));
+      }
       const user = await db.query.users.findFirst({
         where: eq(users.id, decoded.userId),
       });

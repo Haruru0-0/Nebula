@@ -14,11 +14,13 @@ export const createAgent = async (
     const { name, systemPrompt, model, provider, temperature, maxTokens } = req.body as CreateAgentBody;
 
     // Set default model based on provider
-    let defaultModel = 'gpt-4.1';
+    let defaultModel = 'gpt-6-luna';
     const selectedProvider = provider || 'openai';
 
-    if (selectedProvider === 'gemini' && !model) {
-      defaultModel = 'gemini-2.5-flash';
+    if (selectedProvider === 'gemini') {
+      defaultModel = 'gemini-3.6-flash';
+    } else if (selectedProvider === 'deepseek') {
+      defaultModel = 'deepseek-v4-flash';
     }
 
     const [agent] = await db.insert(agents).values({

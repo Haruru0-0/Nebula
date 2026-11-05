@@ -11,6 +11,7 @@ import { loginUser, loginSelector, clearLoginState } from "@/lib/store/slices/au
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Mark } from "@/components/mark"
 import { GlassPanel } from "@/components/panel"
 import { Loader2 } from "lucide-react"
@@ -30,6 +31,7 @@ const formSchema = z.object({
   password: z.string().min(6, {
     message: "Password must be at least 6 characters.",
   }),
+  rememberMe: z.boolean(),
 })
 
 export default function SignInPage() {
@@ -42,6 +44,7 @@ export default function SignInPage() {
     defaultValues: {
       email: "",
       password: "",
+      rememberMe: false,
     },
   })
 
@@ -133,6 +136,28 @@ export default function SignInPage() {
                         />
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start gap-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(checked) => field.onChange(checked === true)}
+                          className="mt-0.5"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="cursor-pointer font-medium">Remember me</FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                          Stay signed in for 30 days on this device. Leave it off on a shared computer.
+                        </p>
+                      </div>
                     </FormItem>
                   )}
                 />

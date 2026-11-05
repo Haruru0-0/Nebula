@@ -7,6 +7,7 @@ const router = express.Router();
 router.use(authenticate);
 
 router.get("/", keyController.getKeys);
+router.get("/:provider/models", keyController.getModels);
 router.put("/:provider", keyController.putKey);
 router.delete("/:provider", keyController.deleteKey);
 

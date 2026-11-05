@@ -23,6 +23,11 @@ export default function ProfilePage() {
         confirmPassword: ""
     })
     const [showPasswordForm, setShowPasswordForm] = useState(false)
+    // The signed-in user comes from the persisted store, which the server cannot see. Show it only after mount
+    // so the first client render matches the server HTML (otherwise React reports a hydration mismatch).
+    const [mounted, setMounted] = useState(false)
+    useEffect(() => setMounted(true), [])
+    const shown = mounted ? user : null
 
     useEffect(() => {
         dispatch(getProfile())
@@ -106,7 +111,7 @@ export default function ProfilePage() {
                                 </Label>
                                 <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
                                     <User className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm">{user?.name || "Not set"}</span>
+                                    <span className="text-sm">{shown?.name || (mounted ? "Not set" : "")}</span>
                                 </div>
                             </div>
 
@@ -116,7 +121,7 @@ export default function ProfilePage() {
                                 </Label>
                                 <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
                                     <Mail className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm">{user?.email}</span>
+                                    <span className="text-sm">{shown?.email}</span>
                                 </div>
                             </div>
                         </div>
@@ -128,7 +133,7 @@ export default function ProfilePage() {
                             <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
                                 <Calendar className="h-4 w-4 text-muted-foreground" />
                                 <span className="text-sm">
-                                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Unknown"}
+                                    {shown?.createdAt ? new Date(shown.createdAt).toLocaleDateString() : mounted ? "Unknown" : ""}
                                 </span>
                             </div>
                         </div>

@@ -1,6 +1,7 @@
 import express, { Application } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
@@ -16,6 +17,12 @@ dotenv.config();
 
 const app: Application = express();
 
+// Behind a proxy (Vercel forwards API calls, Render adds its own) the real client address is in X-Forwarded-For.
+// Set TRUST_PROXY to the number of proxies in front of the API (2 for Vercel then Render), or the rate limit sees
+// everyone as one visitor. Leave it unset when nothing sits in front.
+const trustProxy = parseInt(process.env.TRUST_PROXY || "0");
+if (trustProxy > 0) app.set("trust proxy", trustProxy);
+
 app.use(helmet());
 
 app.use(
@@ -25,6 +32,7 @@ app.use(
   })
 );
 
+app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 

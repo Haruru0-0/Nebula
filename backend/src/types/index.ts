@@ -7,6 +7,8 @@ export interface AuthRequest extends Request {
     name: string | null;
     isVerified: boolean;
   };
+  /** When the token behind this request stops being valid (ms since the epoch). */
+  sessionExpiresAt?: number | null;
 }
 
 export interface JWTPayload {
@@ -22,6 +24,7 @@ export interface SignUpBody {
 export interface SignInBody {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface ForgotPasswordBody {
@@ -51,7 +54,7 @@ export interface CreateAgentBody {
   name: string;
   systemPrompt: string;
   model?: string;
-  provider?: 'openai' | 'gemini';
+  provider?: 'openai' | 'gemini' | 'deepseek';
   temperature?: number;
   maxTokens?: number;
 }
@@ -60,7 +63,7 @@ export interface UpdateAgentBody {
   name?: string;
   systemPrompt?: string;
   model?: string;
-  provider?: 'openai' | 'gemini';
+  provider?: 'openai' | 'gemini' | 'deepseek';
   temperature?: number;
   maxTokens?: number;
   isActive?: boolean;

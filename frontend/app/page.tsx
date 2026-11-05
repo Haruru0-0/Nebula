@@ -23,7 +23,7 @@ const BUILT_WITH = [
   "Next.js 16 and React 19 on the front end",
   "Express and TypeScript on the back end, with PostgreSQL through Drizzle",
   "Socket.io for live metrics and server-sent events for chat",
-  "OpenAI and Google Gemini behind one interface",
+  "OpenAI, Google Gemini and DeepSeek behind one interface",
 ]
 
 export default function LandingPage() {

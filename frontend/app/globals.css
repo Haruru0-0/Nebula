@@ -32,6 +32,7 @@
   --marker: #d4463a;
   --marker-foreground: #fff3df;
   --error-text: #ff8f73;
+  --code-bg: #0b0806;
   --glass-tint: rgba(22, 15, 10, 0.42);
   --glass-edge: rgba(255, 244, 220, 0.2);
   --chart-1: #f1d9a6;
@@ -255,3 +256,15 @@
     background: var(--popover);
   }
 }
+
+/* Syntax colours for highlighted code in chat replies (highlight.js classes), warm and AA on --code-bg */
+.hljs { color: #efe3c8; background: transparent; }
+.hljs-comment, .hljs-quote { color: #9a8c73; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-doctag { color: #ff8f73; }
+.hljs-string, .hljs-regexp, .hljs-addition, .hljs-attribute { color: #b9d68a; }
+.hljs-number, .hljs-symbol, .hljs-bullet, .hljs-variable, .hljs-template-variable { color: #f1d9a6; }
+.hljs-title, .hljs-section, .hljs-built_in, .hljs-type, .hljs-class .hljs-title { color: #8fc7e8; }
+.hljs-name, .hljs-tag, .hljs-selector-id, .hljs-selector-class { color: #ff8f73; }
+.hljs-deletion { color: #ff8f73; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 700; }

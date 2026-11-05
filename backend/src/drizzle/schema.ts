@@ -87,6 +87,34 @@ export const apiKeys = pgTable(
 );
 
 /* =========================
+   Sessions (rotating refresh tokens; only a hash of each token is stored)
+========================= */
+
+export const refreshTokens = pgTable(
+    "refresh_tokens",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+        userId: uuid("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        // Every token from one sign-in shares a family, so a reused token can end the whole sign-in
+        familyId: uuid("family_id").notNull(),
+        tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+        remember: boolean("remember").notNull().default(false),
+        // The absolute end of the sign-in: after this the person signs in again
+        sessionEndsAt: timestamp("session_ends_at", { withTimezone: true }).notNull(),
+        usedAt: timestamp("used_at", { withTimezone: true }),
+        revokedAt: timestamp("revoked_at", { withTimezone: true }),
+        createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    },
+    (t) => [
+        uniqueIndex("refresh_tokens_hash_idx").on(t.tokenHash),
+        index("refresh_tokens_family_idx").on(t.familyId),
+        index("refresh_tokens_user_idx").on(t.userId),
+    ]
+);
+
+/* =========================
    Conversations
 ========================= */
 
