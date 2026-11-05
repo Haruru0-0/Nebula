@@ -8,6 +8,7 @@ import {
     integer,
     timestamp,
     index,
+    uniqueIndex,
     real,
 } from "drizzle-orm/pg-core";
 
@@ -60,6 +61,28 @@ export const agents = pgTable(
     },
     (t) => [
         index("agents_user_id_idx").on(t.userId),
+    ]
+);
+
+/* =========================
+   API keys (each user's own provider keys, encrypted)
+========================= */
+
+export const apiKeys = pgTable(
+    "api_keys",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+        userId: uuid("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        provider: varchar("provider", { length: 20 }).notNull(),
+        encryptedKey: text("encrypted_key").notNull(),
+        keyHint: varchar("key_hint", { length: 8 }).notNull(),
+        createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+        updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    },
+    (t) => [
+        uniqueIndex("api_keys_user_provider_idx").on(t.userId, t.provider),
     ]
 );
 
@@ -193,6 +216,8 @@ export type NewUser = InferInsertModel<typeof users>;
 
 export type Agent = InferSelectModel<typeof agents>;
 export type NewAgent = InferInsertModel<typeof agents>;
+
+export type ApiKey = InferSelectModel<typeof apiKeys>;
 
 export type Conversation = InferSelectModel<typeof conversations>;
 export type NewConversation = InferInsertModel<typeof conversations>;

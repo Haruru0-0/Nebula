@@ -411,6 +411,23 @@ Delete an agent and all its associated data.
 
 ---
 
+## 🔑 API Key APIs
+
+Each user can save their own OpenAI and Gemini keys. Keys are encrypted at rest and are never returned. All routes need a bearer token.
+
+### 1. List keys
+`GET /api/keys` returns `{ keys: [{ provider, hint, updatedAt }], sharedKey: { openai, gemini }, canSave }`. `hint` is the last four characters; `sharedKey` says whether the server has a fallback key.
+
+### 2. Save or replace a key
+`PUT /api/keys/:provider` (`openai` or `gemini`) with body `{ "apiKey": "..." }`. OpenAI keys start with `sk-`, Gemini keys with `AIza`. The key is checked with the provider first; a clear rejection returns 400. Returns `{ provider, hint }`. Returns 503 if the server has no `KEY_ENCRYPTION_SECRET`.
+
+### 3. Remove a key
+`DELETE /api/keys/:provider` returns `{ provider, removed }`.
+
+If an agent's provider has neither a user key nor a server key, chat returns 400 with `code: "API_KEY_MISSING"` (or an SSE `error` event with the same message).
+
+---
+
 ## 💬 Chat APIs
 Base Path: `/chat` (Requires Auth)
 

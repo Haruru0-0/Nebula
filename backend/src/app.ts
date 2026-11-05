@@ -8,7 +8,8 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import agentRoutes from "./routes/agentRoutes";
 import chatRoutes from "./routes/chatRoutes";
-import metricsRoutes from "./routes/metricsRoutes";
+import metricsRoutes from "./routes/metricsRoutes";
+import keyRoutes from "./routes/keyRoutes";
 import { errorHandler, notFound } from "./middlewares/errorHandler";
 
 dotenv.config();
@@ -53,6 +54,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/agents", agentRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/metrics", metricsRoutes);
+app.use("/api/keys", keyRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

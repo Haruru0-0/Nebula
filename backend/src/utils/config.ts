@@ -17,8 +17,11 @@ export const config = {
     user: must("SMTP_USER"),
     password: must("SMTP_PASSWORD"),
   },
-  openAiApiKey: must("OPENAI_API_KEY"),
-  geminiApiKey: must("GEMINI_API_KEY"),
+  // Shared fallback keys. Optional: users can save their own keys instead (see apiKeyService).
+  openAiApiKey: process.env.OPENAI_API_KEY ?? "",
+  geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  // Encrypts users' saved keys. Required to save keys; generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+  keyEncryptionSecret: process.env.KEY_ENCRYPTION_SECRET ?? "",
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS ?? "900000"),
     maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS ?? "100"), 

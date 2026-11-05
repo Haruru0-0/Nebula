@@ -9,11 +9,12 @@ Monorepo with two packages: `backend/` (API) and `frontend/` (Next.js app).
 - `routes/` + `controllers/`: `auth` (signup, signin, verify-email, resend-verification, forgot/reset/change-password, profile), `agents` (CRUD), `chat` (send, stream, list/get/rename/delete conversations), `metrics` (overall, per agent).
 - `services/llmService.ts` (OpenAI and Google Gemini) and `services/emailService.ts` (Nodemailer, sender from `EMAIL_FROM`).
 - `middlewares/`: JWT `authenticate`, request validation, error handler. `utils/`: config (`must()` env checks), jwt, crypto (bcrypt), logger (Winston-style files in `backend/logs/`).
+- `services/apiKeyService.ts`, `controllers/keyController.ts`, `routes/keyRoutes.ts`: each user's own OpenAI and Gemini keys. `PUT/GET/DELETE /api/keys[/:provider]`; keys are encrypted with AES-256-GCM (`utils/secrets.ts`, secret `KEY_ENCRYPTION_SECRET`) into the `api_keys` table and never returned (only the last four characters). `llmService` builds a client per request with the user's key, else the shared server key from `.env`, else it throws `ApiKeyMissingError`.
 - `websocket/metricsSocket.ts`: Socket.io namespace `/metrics` for live metrics.
-- `drizzle/schema.ts`: tables `users`, `agents`, `conversations`, `messages`, `metrics`. Driver is `drizzle-orm/neon-http` with `@neondatabase/serverless`, so the database must be Neon (see [[gotchas]]).
+- `drizzle/schema.ts`: tables `users`, `agents`, `conversations`, `messages`, `metrics`, `api_keys`. Driver is `drizzle-orm/neon-http` with `@neondatabase/serverless`, so the database must be Neon (see [[gotchas]]).
 
 ## Frontend (`frontend/`)
-- Next.js 16 (App Router), React 19, Tailwind 4, Radix UI. Redux Toolkit with persistence (`lib/store/slices/{agents,auth,chat,metrics}`), React Hook Form + Zod, Recharts, Socket.io client.
+- Next.js 16 (App Router), React 19, Tailwind 4, Radix UI. Redux Toolkit with persistence, `motion` (animation) and `liquid-glass-react` (refraction) (`lib/store/slices/{agents,auth,chat,metrics}`), React Hook Form + Zod, Recharts, Socket.io client.
 - Routes: `/` landing; `/auth/{sign-in,sign-up,verify-email,forgot-password,reset-password}`; `/app/{agents,chat,analytics,profile}`.
 - `lib/store/constant.tsx` exports `SERVER_ADDR` (from `NEXT_PUBLIC_API_URL`, default the production Render API). Chat streams from `${SERVER_ADDR}/chat/:agentId/stream`; metrics connect to `${origin}/metrics`.
 - Look: `app/globals.css` tokens and glass classes ("Glass Lanterns", dark only), `components/{backdrop,panel,mark,metric-card,live-lanterns}.tsx`. `Panel` is the calm surface, `GlassPanel` the glass one.

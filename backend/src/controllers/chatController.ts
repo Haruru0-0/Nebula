@@ -4,6 +4,7 @@ import { eq, and, asc, desc } from "drizzle-orm";
 import logger from "../utils/logger";
 import { Response, NextFunction } from "express";
 import { sendMessage, streamMessage } from "../services/llmService";
+import { ApiKeyMissingError } from "../services/apiKeyService";
 import { AuthRequest, SendMessageBody } from "../types";
 
 export const chat = async (
@@ -134,7 +135,7 @@ export const chat = async (
       const conversationHistory = conversation.messages || [];
 
       // Get LLM response
-      const llmResponse = await sendMessage(agent, conversationHistory, message);
+      const llmResponse = await sendMessage(agent, conversationHistory, message, req.user!.id);
 
       // Insert assistant message
       const [assistantMessage] = await db.insert(messages).values({
@@ -175,6 +176,10 @@ export const chat = async (
       throw processingError;
     }
   } catch (error) {
+    if (error instanceof ApiKeyMissingError) {
+      res.status(400).json({ success: false, code: error.code, provider: error.provider, message: error.message });
+      return;
+    }
     logger.error('Chat endpoint error:', error);
     next(error);
   }
@@ -459,7 +464,7 @@ export const streamChat = async (
     res.write(`data: ${JSON.stringify({ type: 'start', conversationId: conversation.id })}\n\n`);
 
     try {
-      const { stream, startTime, provider } = await streamMessage(agent, conversationHistory, message);
+      const { stream, startTime, provider } = await streamMessage(agent, conversationHistory, message, req.user!.id);
 
       let fullContent = '';
       let promptTokens = 0;

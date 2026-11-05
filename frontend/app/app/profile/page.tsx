@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "@/lib/store/store"
 import { getProfile, changePassword, profileSelector } from "@/lib/store/slices/auth/profileSlice"
 import { Panel } from "@/components/panel"
+import { ApiKeysCard } from "@/components/api-keys-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -85,7 +86,7 @@ export default function ProfilePage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
                 <p className="text-muted-foreground">
-                    Manage your account settings and change your password.
+                    Manage your account, your password and your AI provider keys.
                 </p>
             </div>
 
@@ -231,6 +232,8 @@ export default function ProfilePage() {
                         </p>
                     )}
                 </Panel>
+
+                <ApiKeysCard />
             </div>
         </div>
     )

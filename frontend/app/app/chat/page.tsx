@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState, useRef, useEffect, Suspense, useMemo } from "react"
 import { useAppDispatch, useAppSelector } from "@/lib/store/store"
@@ -56,6 +57,7 @@ import type { Agent } from "@/types"
 
 function ChatPageContent() {
   const dispatch = useAppDispatch()
+  const router = useRouter()
 
   // Selectors
   const { agents } = useAppSelector(agentFetchSelector)
@@ -278,7 +280,11 @@ function ChatPageContent() {
                 dispatch(fetchConversationById(data.conversationId))
               } else if (data.type === 'error') {
                 dispatch(setStreamingError(data.message))
-                toast.error(data.message)
+                if (typeof data.message === 'string' && data.message.includes('API key')) {
+                  toast.error(data.message, { action: { label: 'Open Profile', onClick: () => router.push('/app/profile') } })
+                } else {
+                  toast.error(data.message)
+                }
               }
             } catch (e) {
               // Ignore JSON parse errors for incomplete chunks
@@ -538,7 +544,7 @@ function ChatPageContent() {
                 {messages.map((message) => (
                   <div
                     key={message.id}
-                    className={cn("flex gap-3", message.role === "user" ? "justify-end" : "justify-start")}
+                    className={cn("flex gap-3 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 motion-reduce:animate-none", message.role === "user" ? "justify-end" : "justify-start")}
                   >
                     {message.role === "assistant" && (
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary flex-shrink-0">

@@ -3,25 +3,19 @@ import { GoogleGenAI } from "@google/genai";
 import logger from "../utils/logger";
 import { LLMResponse } from "../types";
 import { Agent, Message } from "../drizzle/schema";
-import { config } from "../utils/config";
+import { resolveApiKey, Provider } from "./apiKeyService";
 
-// Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: config.openAiApiKey,
-});
-
-// Initialize Gemini
-const genAI = new GoogleGenAI({
-  apiKey: config.geminiApiKey,
-});
+// Clients are created per request with the key of the user making it (their own key, else the shared server key).
 
 // OpenAI Implementation
 const sendMessageOpenAI = async (
   agent: Agent,
   conversationHistory: Message[],
-  userMessage: string
+  userMessage: string,
+  apiKey: string
 ): Promise<LLMResponse> => {
   const startTime = Date.now();
+  const openai = new OpenAI({ apiKey });
 
   try {
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -73,7 +67,7 @@ const sendMessageOpenAI = async (
       throw new Error("Rate limit exceeded. Please try again later.");
     }
     if (error.status === 401) {
-      throw new Error("Invalid OpenAI API key");
+      throw new Error("OpenAI rejected your API key. Check it in Profile.");
     }
     if (error.status === 400) {
       throw new Error("Invalid request to OpenAI API");
@@ -87,9 +81,11 @@ const sendMessageOpenAI = async (
 const sendMessageGemini = async (
   agent: Agent,
   conversationHistory: Message[],
-  userMessage: string
+  userMessage: string,
+  apiKey: string
 ): Promise<LLMResponse> => {
   const startTime = Date.now();
+  const genAI = new GoogleGenAI({ apiKey });
 
   try {
     const history = conversationHistory.map((msg) => ({
@@ -134,7 +130,7 @@ const sendMessageGemini = async (
     logger.error("Gemini Error:", error);
 
     if (error.message?.includes("API key")) {
-      throw new Error("Invalid Gemini API key");
+      throw new Error("Gemini rejected your API key. Check it in Profile.");
     }
     if (error.message?.includes("quota") || error.message?.includes("429")) {
       throw new Error("Gemini quota exceeded. Please try again later.");
@@ -151,14 +147,16 @@ const sendMessageGemini = async (
 export const sendMessage = async (
   agent: Agent,
   conversationHistory: Message[],
-  userMessage: string
+  userMessage: string,
+  userId: string
 ): Promise<LLMResponse> => {
-  const provider = agent.provider || "openai";
+  const provider: Provider = agent.provider === "gemini" ? "gemini" : "openai";
+  const apiKey = await resolveApiKey(userId, provider);
 
   if (provider === "gemini") {
-    return sendMessageGemini(agent, conversationHistory, userMessage);
+    return sendMessageGemini(agent, conversationHistory, userMessage, apiKey);
   } else {
-    return sendMessageOpenAI(agent, conversationHistory, userMessage);
+    return sendMessageOpenAI(agent, conversationHistory, userMessage, apiKey);
   }
 };
 
@@ -166,7 +164,8 @@ export const sendMessage = async (
 export const streamMessage = async (
   agent: Agent,
   conversationHistory: Message[],
-  userMessage: string
+  userMessage: string,
+  userId: string
 ): Promise<{
   stream:
   | AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>
@@ -175,10 +174,12 @@ export const streamMessage = async (
   provider: string;
 }> => {
   const startTime = Date.now();
-  const provider = agent.provider || "openai";
+  const provider: Provider = agent.provider === "gemini" ? "gemini" : "openai";
+  const apiKey = await resolveApiKey(userId, provider);
 
   if (provider === "gemini") {
     try {
+      const genAI = new GoogleGenAI({ apiKey });
       const history = conversationHistory.map((msg) => ({
         role: msg.role === "user" ? ("user" as const) : ("model" as const),
         parts: [{ text: msg.content }],
@@ -204,10 +205,14 @@ export const streamMessage = async (
       };
     } catch (error) {
       logger.error("Gemini Streaming Error:", error);
+      if (String((error as Error)?.message ?? "").includes("API key")) {
+        throw new Error("Gemini rejected your API key. Check it in Profile.");
+      }
       throw new Error("Failed to initiate Gemini streaming response");
     }
   } else {
     try {
+      const openai = new OpenAI({ apiKey });
       const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
         {
           role: "system",
@@ -238,6 +243,9 @@ export const streamMessage = async (
       };
     } catch (error) {
       logger.error("OpenAI Streaming Error:", error);
+      if ((error as { status?: number })?.status === 401) {
+        throw new Error("OpenAI rejected your API key. Check it in Profile.");
+      }
       throw new Error("Failed to initiate OpenAI streaming response");
     }
   }
