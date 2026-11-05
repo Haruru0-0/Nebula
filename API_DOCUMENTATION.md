@@ -7,8 +7,12 @@ The API is accessible at: `http://localhost:4000/api` (default development)
 
 ## Authentication
 Most endpoints require authentication via a JSON Web Token (JWT).
-- Include the token in the `Authorization` header as follows: `Authorization: Bearer <your_token>`
-- You can obtain a token by signing up or signing in via the Auth endpoints.
+- Signing in (or verifying your email) sets two **HttpOnly cookies**: `nebula_session` (the access token, `JWT_EXPIRES_IN`, 15 minutes recommended) and `nebula_refresh` (a random refresh token, sent only to `/api/auth/*`). Browsers send them automatically; page scripts cannot read them. Send requests with credentials (`withCredentials` / `credentials: "include"`).
+- When a request answers 401 because the access token ran out, call `POST /api/auth/refresh`; it swaps the refresh cookie for a new pair (the refresh token works once, and reusing an old one ends the whole sign-in). A sign-in lasts a day, or 30 days if the sign-in body had `"rememberMe": true` (then the refresh cookie also survives closing the browser). Changing or resetting a password ends the other sign-ins.
+- Requests that change data (anything but GET) must also send the header `X-Requested-With: nebula`, or they get 403. This stops other sites from forging requests with your cookie.
+- Tools that cannot use cookies can still send a token in `Authorization: Bearer <token>`.
+- `POST /api/auth/logout` ends the sign-in and clears both cookies. `GET /api/auth/socket-token` returns a one-minute token for opening the live-metrics socket (`auth: { token }`), because the socket server does not receive the cookie.
+- Cookie flags: `SameSite=Lax` and `Secure` in production. The frontend (Vercel) forwards `/api` to the backend, so the cookie belongs to the frontend's own domain. The chat stream and the live-metrics socket connect to the backend directly with a one-minute token from `GET /api/auth/socket-token` instead (send it as `Authorization: Bearer <token>`).
 - Email verification is required before signing in.
 
 ## Response Format
@@ -107,8 +111,7 @@ Verify user email using the OTP sent via email.
       "name": "John Doe",
       "isVerified": true
     },
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "expiresAt": 1794469067000 (when the whole sign-in ends, ms since the epoch)
   }
 }
 ```
@@ -155,8 +158,7 @@ Authenticate an existing verified user.
       "email": "user@example.com",
       "name": "John Doe"
     },
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "expiresAt": 1794469067000 (when the whole sign-in ends, ms since the epoch)
   }
 }
 ```
@@ -264,15 +266,13 @@ Create a new AI agent with custom configuration.
 {
   "name": "Support Bot",
   "systemPrompt": "You are a helpful assistant...",
-  "provider": "openai", (optional, default: 'openai', supports: 'openai', 'gemini')
-  "model": "gpt-4.1", (optional, auto-selected based on provider if not specified)
+  "provider": "openai", (optional, default: 'openai', supports: 'openai', 'gemini', 'deepseek')
+  "model": "gpt-6-luna", (optional, defaults to gpt-6-luna, gemini-3.6-flash or deepseek-v4-flash by provider)
   "temperature": 0.7, (optional, 0-2, default: 0.7)
-  "maxTokens": 1000 (optional, 100-8000, default: 1000)
+  "maxTokens": 1000 (optional, 1-10000, default: 1000)
 }
 ```
-- **Available Models:**
-  - **OpenAI:** `gpt-5.2`, `gpt-5-mini`, `gpt-5-nano`, `gpt-5.2-pro`, `gpt-5`, `gpt-4.1`
-  - **Gemini:** `gemini-3.0-pro`, `gemini-3.0-flash`, `gemini-2.5-pro`, `gemini-2.5-flash`
+- **Models:** any model id the provider offers (letters, digits, `.`, `_`, `:`, `/`, `-`). Use `GET /api/keys/:provider/models` for the current list. The app's built-in fallback list: OpenAI `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna`; Gemini `gemini-4-argon`, `gemini-3.8-flash`, `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-pro-preview`; DeepSeek `deepseek-v4-pro`, `deepseek-v4-flash`.
 - **Success Response (201):**
 ```json
 {
@@ -416,13 +416,16 @@ Delete an agent and all its associated data.
 Each user can save their own OpenAI and Gemini keys. Keys are encrypted at rest and are never returned. All routes need a bearer token.
 
 ### 1. List keys
-`GET /api/keys` returns `{ keys: [{ provider, hint, updatedAt }], sharedKey: { openai, gemini }, canSave }`. `hint` is the last four characters; `sharedKey` says whether the server has a fallback key.
+`GET /api/keys` returns `{ keys: [{ provider, hint, updatedAt }], sharedKey: { openai, gemini, deepseek }, canSave }`. `hint` is the last four characters; `sharedKey` says whether the server has a fallback key.
 
 ### 2. Save or replace a key
-`PUT /api/keys/:provider` (`openai` or `gemini`) with body `{ "apiKey": "..." }`. OpenAI keys start with `sk-`, Gemini keys with `AIza`. The key is checked with the provider first; a clear rejection returns 400. Returns `{ provider, hint }`. Returns 503 if the server has no `KEY_ENCRYPTION_SECRET`.
+`PUT /api/keys/:provider` (`openai`, `gemini` or `deepseek`) with body `{ "apiKey": "..." }`. OpenAI and DeepSeek keys start with `sk-`, Gemini keys with `AIza`. The key is checked with the provider first; a clear rejection returns 400. Returns `{ provider, hint }`. Returns 503 if the server has no `KEY_ENCRYPTION_SECRET`.
 
 ### 3. Remove a key
 `DELETE /api/keys/:provider` returns `{ provider, removed }`.
+
+### 4. Latest models for a provider
+`GET /api/keys/:provider/models` lists the newest chat models the user's key (or the shared key) can use, newest first: `{ models: [{ id, name }], source }`. `source` is `provider`, `no-key` or `unavailable`; with the last two `models` is empty and clients should use a built-in list.
 
 If an agent's provider has neither a user key nor a server key, chat returns 400 with `code: "API_KEY_MISSING"` (or an SSE `error` event with the same message).
 
@@ -755,8 +758,8 @@ The API uses **Joi** for request validation. Invalid requests return a 400 statu
 #### Agent Validation
 - **Name:** Required, 2-100 characters
 - **System Prompt:** Required, 10-5000 characters
-- **Provider:** Optional, must be 'openai' or 'gemini'
-- **Model:** Optional, must be a valid model name from the supported list
+- **Provider:** Optional, must be 'openai', 'gemini' or 'deepseek'
+- **Model:** Optional, a model id of up to 100 characters (letters, digits, `.`, `_`, `:`, `/`, `-`)
 - **Temperature:** Optional, 0 to 2 (default 0.7)
 - **Max Tokens:** Optional, 100 to 8000 (default 1000)
 

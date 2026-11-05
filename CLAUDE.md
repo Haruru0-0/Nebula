@@ -4,7 +4,7 @@ AI agent control center: create LLM agents, chat with them, watch live metrics. 
 
 ## Commands
 - Backend (`cd backend`): `yarn dev` (port 4000), `yarn build`, `yarn db:push` (create tables), `yarn db:studio`. Needs `backend/.env` (copy `.env.example`; Neon `DATABASE_URL`, both AI keys, SMTP and `EMAIL_FROM`).
-- Frontend (`cd frontend`): `yarn dev` (use `-p 3001` if 3000 is busy), `npx tsc --noEmit`. Set `NEXT_PUBLIC_API_URL=http://localhost:4000/api` in `frontend/.env.local` to use a local backend.
+- Frontend (`cd frontend`): `yarn dev` (use `-p 3001` if 3000 is busy), `npx tsc --noEmit`. Copy `frontend/.env.example` to `frontend/.env.local` (`BACKEND_URL` for the API proxy, `NEXT_PUBLIC_DIRECT_API_URL` for the chat stream and live metrics). Restart `next dev` after changing `next.config.mjs`.
 - There is no ESLint config in either package.
 
 ## Conventions
